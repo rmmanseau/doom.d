@@ -65,6 +65,9 @@
   (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
   (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
 
+(setq enable-recursive-minibuffers nil)
+
+
 ;; after package config
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -102,11 +105,32 @@
 
  ; window / mode nav
 (map! :nmiv "C-o" #'evil-window-next
-      (:map compilation-mode-map "C-o" nil))
+      (:map compilation-mode-map "C-o" nil)
+      (:map help-mode-map :n "C-o" nil)
+      )
+
 (map! :nmvg "C-b" #'ivy-switch-buffer
-      (:map magit-mode-map :nv "C-b" nil))
+      (:map magit-mode-map :nv "C-b" nil)
+      (:map counsel-find-file-map "C-b"
+       (lambda ()
+         (interactive)
+         (ivy-exit-with-action
+          (lambda (_)
+            (ivy-switch-buffer))))))
+
 (map! :nmvg "C-f" #'counsel-find-file
-      (:map magit-mode-map :nv "C-f" nil))
+      (:map magit-mode-map :nv "C-f" nil)
+      (:map ivy-switch-buffer-map "C-f"
+       (lambda ()
+         (interactive)
+         (ivy-exit-with-action
+          (lambda (str)
+            (let* ((buf (get-buffer str))
+                   (default-directory
+                     (or (and buf (buffer-local-value 'default-directory buf))
+                         default-directory)))
+              (counsel-find-file)))))))
+
 
 (map! :iv "C-g" #'evil-force-normal-state)
 (map! :iv "C-j" #'evil-force-normal-state)
