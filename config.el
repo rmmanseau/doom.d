@@ -101,10 +101,13 @@
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
 
  ; window / mode nav
-(map! :nmiv "C-o" #'evil-window-next)
-(map! (:map compilation-mode-map "C-o" nil))
-(map! :n "C-b" #'ivy-switch-buffer)
-(map! :n "C-f" #'counsel-find-file)
+(map! :nmiv "C-o" #'evil-window-next
+      (:map compilation-mode-map "C-o" nil))
+(map! :nmvg "C-b" #'ivy-switch-buffer
+      (:map magit-mode-map :nv "C-b" nil))
+(map! :nmvg "C-f" #'counsel-find-file
+      (:map magit-mode-map :nv "C-f" nil))
+
 (map! :iv "C-g" #'evil-force-normal-state)
 (map! :iv "C-j" #'evil-force-normal-state)
 
