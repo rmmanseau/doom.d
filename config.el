@@ -98,6 +98,8 @@
  :desc "Eval expression" ":" #'pp-eval-expression
  )
 
+(map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
+
 (map!
  ; window / mode nav
  :nmiv "C-o" #'evil-window-next
