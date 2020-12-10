@@ -100,7 +100,7 @@
 
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
 
- ; window / mode nav
+; window / mode nav
 (map! :nmiv "C-o" #'evil-window-next)
 (map! (:map compilation-mode-map "C-o" nil))
 (map! :n "C-b" #'ivy-switch-buffer)
