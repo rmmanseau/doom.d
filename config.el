@@ -70,11 +70,11 @@
 
 (after! avy
   (setq avy-all-windows t)
-  (set-face-attribute 'avy-goto-char-timer-face nil :background "color-88" :foreground 'unspecified)
-  (set-face-attribute 'avy-lead-face nil :background "color-88" :foreground "white")
-  (set-face-attribute 'avy-lead-face-0 nil :background "color-88" :foreground "white")
-  (set-face-attribute 'avy-lead-face-1 nil :background "color-88" :foreground "white")
-  (set-face-attribute 'avy-lead-face-2 nil :background "color-88" :foreground "white"))
+  (set-face-attribute 'avy-goto-char-timer-face nil :background "red" :foreground 'unspecified)
+  (set-face-attribute 'avy-lead-face nil :background "red" :foreground "white")
+  (set-face-attribute 'avy-lead-face-0 nil :background "red" :foreground "white")
+  (set-face-attribute 'avy-lead-face-1 nil :background "red" :foreground "white")
+  (set-face-attribute 'avy-lead-face-2 nil :background "red" :foreground "white"))
 (after! swiper
   (set-face-attribute 'swiper-line-face nil :background "color-240" :foreground 'unspecified ))
 (after! ivy
@@ -100,31 +100,38 @@
 
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
 
-(map!
  ; window / mode nav
- :nmiv "C-o" #'evil-window-next
- (:map compilation-mode-map "C-o" nil)
- :n "C-b" #'ivy-switch-buffer
- :n "C-f" #'counsel-find-file
- :iv "C-g" #'evil-force-normal-state
- :iv "C-j" #'evil-force-normal-state
+(map! :nmiv "C-o" #'evil-window-next)
+(map! (:map compilation-mode-map "C-o" nil))
+(map! :n "C-b" #'ivy-switch-buffer)
+(map! :n "C-f" #'counsel-find-file)
+(map! :iv "C-g" #'evil-force-normal-state)
+(map! :iv "C-j" #'evil-force-normal-state)
 
- ; cursor nav
- :nmv "j" #'evil-next-visual-line
- :nmv "k" #'evil-previous-visual-line
- :n "C-k" (lambda () (interactive) (evil-scroll-line-down 8))
- :n "C-j" (lambda () (interactive) (evil-scroll-line-up 8))
- :nmv "J" (kbd "4j")
- :nmv "K" (kbd "4k")
- :nmv "L" #'evil-forward-WORD-end
- :nmv "H" #'evil-backward-WORD-begin
- :mnv "ga" #'evil-avy-goto-char-timer
- :mnv "gl" #'evil-avy-goto-line
- :n "gb" #'better-jumper-jump-backward
- :n "gf" #'better-jumper-jump-forward
+; cursor nav
+(map! :nmv "j" #'evil-next-visual-line)
+(map! :nmv "k" #'evil-previous-visual-line)
+(map! :n "C-k" (lambda () (interactive) (evil-scroll-line-down 8)))
+(map! :n "C-j" (lambda () (interactive) (evil-scroll-line-up 8)))
+(map! :nmv "J" (kbd "4j"))
+(map! :nmv "K" (kbd "4k"))
+(map! :nmv "L" #'evil-forward-WORD-end)
+(map! :nmv "H" #'evil-backward-WORD-begin)
 
- ; utilities
- :n "/" #'swiper
- :n "*" #'swiper-thing-at-point
- :n "U" #'evil-redo
- )
+(map! :mnv "ga" #'evil-avy-goto-char-2)
+(map! :mnv "g/" #'evil-avy-goto-char-timer)
+(map! :mnv "gl" #'evil-avy-goto-line)
+(map! :mnv "C-_" #'+default/search-project
+      :mnv "C-/" #'+default/search-project
+      (:map undo-fu-mode-map
+      "C-/" nil
+      "C-_" nil))
+(map! :mnv "C-l" #'evil-avy-goto-line)
+(map! :n "gb" #'better-jumper-jump-backward)
+(map! :n "gf" #'better-jumper-jump-forward)
+
+; utilities
+(map! :n "/" #'swiper)
+(map! :n "?" #'swiper-all)
+(map! :n "*" #'swiper-thing-at-point)
+(map! :n "U" #'evil-redo)
