@@ -61,7 +61,6 @@
 
 (setq doom-theme 'doom-molokai)
 (setq display-line-numbers-type nil)
-(setq enable-recursive-minibuffers nil)
 (unless window-system
   (xterm-mouse-mode t)
   (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
@@ -73,10 +72,13 @@
   (set-face-attribute 'avy-lead-face nil :background "red" :foreground "white")
   (set-face-attribute 'avy-lead-face-0 nil :background "red" :foreground "white")
   (set-face-attribute 'avy-lead-face-1 nil :background "red" :foreground "white")
-  (set-face-attribute 'avy-lead-face-2 nil :background "red" :foreground "white"))
+  (set-face-attribute 'avy-lead-face-2 nil :background "red" :foreground "white")
+  )
 
 (after! swiper
-  (set-face-attribute 'swiper-line-face nil :background "color-240" :foreground 'unspecified ))
+  (setq swiper-action-recenter nil)
+  (set-face-attribute 'swiper-line-face nil :background "color-240" :foreground 'unspecified )
+  )
 
 (after! ivy
   (setq ivy-use-virtual-buffers t)
@@ -85,7 +87,8 @@
 
 (after! evil
   (setq evil-move-cursor-back nil)
-  (setq evil-cross-lines t))
+  (setq evil-cross-lines t)
+  )
 
 ;; keybinds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -151,11 +154,12 @@
 (map! :n "U" #'evil-redo)
 
 ; search
-(map! :n "/" #'swiper)
-(map! :n "?" #'swiper-all)
-(map! :n "*" #'swiper-thing-at-point)
-(map! :mnv "C-_" #'+default/search-project
-      :mnv "C-/" #'+default/search-project
+(map! :nmv "/" #'swiper)
+(map! :nmv "?" #'swiper-backward)
+(map! :nmv "*" #'swiper-thing-at-point)
+(map! :nmv "C-_" #'swiper-all
+      :nmv "C-/" #'swiper-all
       (:map undo-fu-mode-map
       "C-/" nil
       "C-_" nil))
+(map! :leader "?" #'swiper-all)
