@@ -68,26 +68,30 @@
 
 (after! avy
   (setq avy-all-windows t)
-  (set-face-attribute 'avy-goto-char-timer-face nil :background "red" :foreground 'unspecified)
-  (set-face-attribute 'avy-lead-face nil :background "red" :foreground "white")
-  (set-face-attribute 'avy-lead-face-0 nil :background "red" :foreground "white")
-  (set-face-attribute 'avy-lead-face-1 nil :background "red" :foreground "white")
-  (set-face-attribute 'avy-lead-face-2 nil :background "red" :foreground "white")
   )
 
 (after! swiper
   (setq swiper-action-recenter nil)
-  (set-face-attribute 'swiper-line-face nil :background "color-240" :foreground 'unspecified )
   )
 
 (after! ivy
   (setq ivy-use-virtual-buffers t)
-  (set-face-attribute 'ivy-modified-buffer nil :foreground 'unspecified :inherit font-lock-doc-face )
   )
 
 (after! evil
   (setq evil-move-cursor-back nil)
   (setq evil-cross-lines t)
+  )
+
+(custom-set-faces!
+  '(eros-result-overlay-face :background nil)
+  '(ivy-modified-buffer :foreground nil :inherit font-lock-doc-face)
+  '(swiper-line-face :background "color-235" :foreground nil )
+  '(avy-goto-char-timer-face :background "red" :foreground nil)
+  '(avy-lead-face :background "red" :foreground "white")
+  '(avy-lead-face-0 :background "red" :foreground "white")
+  '(avy-lead-face-1 :background "red" :foreground "white")
+  '(avy-lead-face-2 :background "red" :foreground "white")
   )
 
 ;; keybinds
@@ -106,7 +110,9 @@
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
 (map! :nmiv "C-o" #'evil-window-next
       (:map compilation-mode-map "C-o" nil)
-      (:map help-mode-map :n "C-o" nil))
+      (:after evil-collection
+       :map help-mode-map
+       :n "C-o" nil))
 (map! :nmvg "C-b" #'ivy-switch-buffer
       (:map magit-mode-map :nv "C-b" nil)
       (:map counsel-find-file-map "C-b"
