@@ -63,8 +63,9 @@
 (setq display-line-numbers-type nil)
 (unless window-system
   (xterm-mouse-mode t)
-  (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
-  (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
+  (map! :g "<mouse-4>" #'scroll-down-line)
+  (map! :g "<mouse-5>" #'scroll-up-line)
+  )
 
 (after! avy
   (setq avy-all-windows t)
