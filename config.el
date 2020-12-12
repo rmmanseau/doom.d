@@ -110,7 +110,7 @@
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
 (map! :nmiv "C-o" #'evil-window-next
       (:map compilation-mode-map "C-o" nil)
-      (:after evil-collection
+      (:after help
        :map help-mode-map
        :n "C-o" nil))
 (map! :nmvg "C-b" #'ivy-switch-buffer
