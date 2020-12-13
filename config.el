@@ -143,9 +143,17 @@
 ; exit to normal state
 (map! :iv "C-j" #'evil-force-normal-state)
 (map! :iv "C-k" #'evil-force-normal-state)
-; disable C-g in autocomplete popup window map
-(map! :after company :map company-active-map "C-g" nil)
 
+; make autocomplete popup less intrusive
+(map! :after company :map company-active-map
+      "C-g" nil
+      "RET" nil
+      "C-SPC" #'company-complete-selection
+      )
+
+(after! expand-region
+  (setq expand-region-contract-fast-key "c")
+  )
 
 ; cursor nav
 (map! :nmv "j" #'evil-next-visual-line)
@@ -167,8 +175,7 @@
 (map! :textobj "b" #'evil-textobj-anyblock-inner-block #'evil-textobj-anyblock-a-block)
 (map! :textobj ";" #'evilnc-inner-comment #'evilnc-outer-commenter)
 (map! :textobj "c" nil nil)
-(map! :v "ie" #'er/expand-region)
-(map! :v "ic" #'er/contract-region)
+(map! :v "v" #'er/expand-region)
 
 ; editing
 (map! :nmv "gj" #'evil-join)
