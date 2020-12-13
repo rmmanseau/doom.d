@@ -100,18 +100,24 @@
 
 ; leader keys
 (map! :leader
+      :desc "M-x" ";" #'counsel-M-x
+      :desc "Eval expression" ":" #'pp-eval-expression
       (:prefix "w" ; window
        "-" #'evil-window-split
        "\\" #'evil-window-vsplit
        "+" nil)
-      :desc "M-x" ";" #'counsel-M-x
-      :desc "Eval expression" ":" #'pp-eval-expression)
+      (:prefix "TAB"
+       "j" #'+workspace/switch-left
+       "k" #'+workspace/switch-right)
+      )
 
 ; buffer / window management
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
+
 (map! :nmiv "C-o" #'evil-window-next
       (:map compilation-mode-map "C-o" nil)
       (:after help :map help-mode-map :n "C-o" nil))
+
 (map! :nmvg "C-b" #'ivy-switch-buffer
       (:map magit-mode-map :nv "C-b" nil)
       (:map counsel-find-file-map "C-b"
@@ -120,6 +126,7 @@
          (ivy-exit-with-action
           (lambda (_)
             (ivy-switch-buffer))))))
+
 (map! :nmvg "C-f" #'counsel-find-file
       (:map magit-mode-map :nv "C-f" nil)
       (:map ivy-switch-buffer-map "C-f"
@@ -133,10 +140,12 @@
                          default-directory)))
               (counsel-find-file)))))))
 
+; exit to normal state
 (map! :iv "C-j" #'evil-force-normal-state)
 (map! :iv "C-k" #'evil-force-normal-state)
-(map! :i "jk" #'evil-force-normal-state)
-(map! :i "kj" #'evil-force-normal-state)
+; disable C-g in autocomplete popup window map
+(map! :after company :map company-active-map "C-g" nil)
+
 
 ; cursor nav
 (map! :nmv "j" #'evil-next-visual-line)
