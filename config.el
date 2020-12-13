@@ -148,18 +148,15 @@
 (map! :after company :map company-active-map
       "C-g" nil
       "RET" nil
-      "C-SPC" #'company-complete-selection
-      )
-
-(after! expand-region
-  (setq expand-region-contract-fast-key "c")
-  )
+      "C-SPC" #'company-complete-selection)
 
 ; cursor nav
 (map! :nmv "j" #'evil-next-visual-line)
 (map! :nmv "k" #'evil-previous-visual-line)
 (map! :n "C-k" (lambda () (interactive) (evil-scroll-line-down 8)))
 (map! :n "C-j" (lambda () (interactive) (evil-scroll-line-up 8)))
+(map! :n "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2))))
+(map! :n "C-u" (lambda () (interactive) (evil-scroll-line-down (/ (window-height) 2))))
 (map! :nmv "J" (kbd "3j"))
 (map! :nmv "K" (kbd "3k"))
 (map! :nmv "L" #'evil-forward-WORD-end)
@@ -176,6 +173,7 @@
 (map! :textobj ";" #'evilnc-inner-comment #'evilnc-outer-commenter)
 (map! :textobj "c" nil nil)
 (map! :v "v" #'er/expand-region)
+(after! expand-region (setq expand-region-contract-fast-key "c"))
 
 ; editing
 (map! :nmv "gj" #'evil-join)
