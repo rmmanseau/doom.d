@@ -92,7 +92,7 @@
   '(avy-lead-face :background "red" :foreground "white")
   '(avy-lead-face-0 :background "red" :foreground "white")
   '(avy-lead-face-1 :background "red" :foreground "white")
-  '(avy-lead-face-2 :background "red" :foreground "white")
+  '(avy-lead-face-1 :background "red" :foreground "white")
   )
 
 ;; keybinds
@@ -111,9 +111,7 @@
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
 (map! :nmiv "C-o" #'evil-window-next
       (:map compilation-mode-map "C-o" nil)
-      (:after help
-       :map help-mode-map
-       :n "C-o" nil))
+      (:after help :map help-mode-map :n "C-o" nil))
 (map! :nmvg "C-b" #'ivy-switch-buffer
       (:map magit-mode-map :nv "C-b" nil)
       (:map counsel-find-file-map "C-b"
@@ -135,17 +133,18 @@
                          default-directory)))
               (counsel-find-file)))))))
 
-; edit mode
-(map! :iv "C-g" #'evil-force-normal-state)
 (map! :iv "C-j" #'evil-force-normal-state)
+(map! :iv "C-k" #'evil-force-normal-state)
+(map! :i "jk" #'evil-force-normal-state)
+(map! :i "kj" #'evil-force-normal-state)
 
 ; cursor nav
 (map! :nmv "j" #'evil-next-visual-line)
 (map! :nmv "k" #'evil-previous-visual-line)
 (map! :n "C-k" (lambda () (interactive) (evil-scroll-line-down 8)))
 (map! :n "C-j" (lambda () (interactive) (evil-scroll-line-up 8)))
-(map! :nmv "J" (kbd "4j"))
-(map! :nmv "K" (kbd "4k"))
+(map! :nmv "J" (kbd "3j"))
+(map! :nmv "K" (kbd "3k"))
 (map! :nmv "L" #'evil-forward-WORD-end)
 (map! :nmv "H" #'evil-backward-WORD-begin)
 (map! :mnv "ga" #'evil-avy-goto-char-2)
@@ -154,6 +153,13 @@
 (map! :n "gb" #'better-jumper-jump-backward)
 (map! :n "gf" #'better-jumper-jump-forward)
 (map! :nmv "gc" #'goto-last-change)
+
+; text objects
+(map! :textobj "b" #'evil-textobj-anyblock-inner-block #'evil-textobj-anyblock-a-block)
+(map! :textobj ";" #'evilnc-inner-comment #'evilnc-outer-commenter)
+(map! :textobj "c" nil nil)
+(map! :v "ie" #'er/expand-region)
+(map! :v "ic" #'er/contract-region)
 
 ; editing
 (map! :nmv "gj" #'evil-join)
