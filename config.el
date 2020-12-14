@@ -61,10 +61,6 @@
 
 (setq doom-theme 'doom-molokai)
 (setq display-line-numbers-type nil)
-(unless window-system
-  (xterm-mouse-mode t)
-  (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
-  (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
 
 (after! avy
   (setq avy-all-windows t)
@@ -83,6 +79,24 @@
   (setq evil-cross-lines t)
   )
 
+(after! org-roam
+  (setq org-roam-directory "/Users/ryan/cut/org")
+  (setq org-roam-index-file "index.org")
+  (setq org-roam-capture-templates
+        '(("d" "default" plain (function org-roam-capture--get-point)
+           "%?"
+           :file-name "${slug}"
+           :head "#+TITLE: ${title}
+#+ROAM_ALIAS:
+#+CREATED: %u
+
+- tags ::
+
+
+"
+           :unnarrowed t)))
+  )
+
 (custom-set-faces!
   '(eros-result-overlay-face :background nil)
   '(ivy-modified-buffer :foreground nil :inherit font-lock-doc-face)
@@ -99,20 +113,24 @@
 
 ; leader keys
 (map! :leader
+      :desc "M-x" ";" #'counsel-M-x
+      :desc "Eval expression" ":" #'pp-eval-expression
       (:prefix "w" ; window
        "-" #'evil-window-split
        "\\" #'evil-window-vsplit
        "+" nil)
-      :desc "M-x" ";" #'counsel-M-x
-      :desc "Eval expression" ":" #'pp-eval-expression)
+      (:prefix "TAB"
+       "j" #'+workspace/switch-left
+       "k" #'+workspace/switch-right)
+      )
 
 ; buffer / window management
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
+
 (map! :nmiv "C-o" #'evil-window-next
       (:map compilation-mode-map "C-o" nil)
-      (:after evil-collection
-       :map help-mode-map
-       :n "C-o" nil))
+      (:after help :map help-mode-map :n "C-o" nil))
+
 (map! :nmvg "C-b" #'ivy-switch-buffer
       (:map magit-mode-map :nv "C-b" nil)
       (:map counsel-find-file-map "C-b"
@@ -121,6 +139,7 @@
          (ivy-exit-with-action
           (lambda (_)
             (ivy-switch-buffer))))))
+
 (map! :nmvg "C-f" #'counsel-find-file
       (:map magit-mode-map :nv "C-f" nil)
       (:map ivy-switch-buffer-map "C-f"
@@ -134,17 +153,27 @@
                          default-directory)))
               (counsel-find-file)))))))
 
-; edit mode
-(map! :iv "C-g" #'evil-force-normal-state)
-(map! :iv "C-j" #'evil-force-normal-state)
+; make autocomplete popup less intrusive
+(map! :after company :map company-active-map
+      "C-g" nil
+      "RET" nil
+      "C-SPC" #'company-complete-selection
+      "C-@" #'company-complete-selection) ; C-@ is terminal bind for C-SPC
 
 ; cursor nav
 (map! :nmv "j" #'evil-next-visual-line)
 (map! :nmv "k" #'evil-previous-visual-line)
-(map! :n "C-k" (lambda () (interactive) (evil-scroll-line-down 8)))
-(map! :n "C-j" (lambda () (interactive) (evil-scroll-line-up 8)))
-(map! :nmv "J" (kbd "4j"))
-(map! :nmv "K" (kbd "4k"))
+(map! :nm "C-k" (lambda () (interactive) (evil-scroll-line-down 8))
+      :iv "C-k" #'evil-force-normal-state
+      :nm "C-j" (lambda () (interactive) (evil-scroll-line-up 8))
+      :iv "C-j" #'evil-force-normal-state)
+(map! :after (evil-org org) :map (org-mode-map evil-org-mode-map)
+      :nmiv "C-k" nil
+      :nmiv "C-j" nil)
+(map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2))))
+(map! :nm "C-u" (lambda () (interactive) (evil-scroll-line-down (/ (window-height) 2))))
+(map! :nmv "J" (kbd "3j"))
+(map! :nmv "K" (kbd "3k"))
 (map! :nmv "L" #'evil-forward-WORD-end)
 (map! :nmv "H" #'evil-backward-WORD-begin)
 (map! :mnv "ga" #'evil-avy-goto-char-2)
@@ -153,6 +182,13 @@
 (map! :n "gb" #'better-jumper-jump-backward)
 (map! :n "gf" #'better-jumper-jump-forward)
 (map! :nmv "gc" #'goto-last-change)
+
+; text objects
+(map! :textobj "b" #'evil-textobj-anyblock-inner-block #'evil-textobj-anyblock-a-block)
+(map! :textobj ";" #'evilnc-inner-comment #'evilnc-outer-commenter)
+(map! :textobj "c" nil nil)
+(map! :v "v" #'er/expand-region)
+(after! expand-region (setq expand-region-contract-fast-key "c"))
 
 ; editing
 (map! :nmv "gj" #'evil-join)
@@ -167,5 +203,5 @@
       :nmv "C-/" #'swiper-all
       (:map undo-fu-mode-map
       "C-/" nil
-      "C-_" nil))
+      "C-_" nil)) ; C-_ is terminal bind for C-/
 (map! :leader "?" #'swiper-all)
