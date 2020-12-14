@@ -148,15 +148,16 @@
 (map! :after company :map company-active-map
       "C-g" nil
       "RET" nil
-      "C-SPC" #'company-complete-selection)
+      "C-SPC" #'company-complete-selection
+      "C-@" #'company-complete-selection) ; C-@ is terminal bind for C-SPC
 
 ; cursor nav
 (map! :nmv "j" #'evil-next-visual-line)
 (map! :nmv "k" #'evil-previous-visual-line)
-(map! :n "C-k" (lambda () (interactive) (evil-scroll-line-down 8)))
-(map! :n "C-j" (lambda () (interactive) (evil-scroll-line-up 8)))
-(map! :n "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2))))
-(map! :n "C-u" (lambda () (interactive) (evil-scroll-line-down (/ (window-height) 2))))
+(map! :nm "C-k" (lambda () (interactive) (evil-scroll-line-down 8)))
+(map! :nm "C-j" (lambda () (interactive) (evil-scroll-line-up 8)))
+(map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2))))
+(map! :nm "C-u" (lambda () (interactive) (evil-scroll-line-down (/ (window-height) 2))))
 (map! :nmv "J" (kbd "3j"))
 (map! :nmv "K" (kbd "3k"))
 (map! :nmv "L" #'evil-forward-WORD-end)
@@ -188,5 +189,5 @@
       :nmv "C-/" #'swiper-all
       (:map undo-fu-mode-map
       "C-/" nil
-      "C-_" nil))
+      "C-_" nil)) ; C-_ is terminal bind for C-/
 (map! :leader "?" #'swiper-all)
