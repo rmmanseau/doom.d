@@ -61,11 +61,6 @@
 
 (setq doom-theme 'doom-molokai)
 (setq display-line-numbers-type nil)
-(unless window-system
-  (xterm-mouse-mode t)
-  (map! :g "<mouse-4>" #'scroll-down-line)
-  (map! :g "<mouse-5>" #'scroll-up-line)
-  )
 
 (after! avy
   (setq avy-all-windows t)
