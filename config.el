@@ -84,6 +84,24 @@
   (setq evil-cross-lines t)
   )
 
+(after! org-roam
+  (setq org-roam-directory "/Users/ryan/cut/org")
+  (setq org-roam-index-file "index.org")
+  (setq org-roam-capture-templates
+        '(("d" "default" plain (function org-roam-capture--get-point)
+           "%?"
+           :file-name "${slug}"
+           :head "#+TITLE: ${title}
+#+ROAM_ALIAS:
+#+CREATED: %u
+
+- tags ::
+
+
+"
+           :unnarrowed t)))
+  )
+
 (custom-set-faces!
   '(eros-result-overlay-face :background nil)
   '(ivy-modified-buffer :foreground nil :inherit font-lock-doc-face)
@@ -140,10 +158,6 @@
                          default-directory)))
               (counsel-find-file)))))))
 
-; exit to normal state
-(map! :iv "C-j" #'evil-force-normal-state)
-(map! :iv "C-k" #'evil-force-normal-state)
-
 ; make autocomplete popup less intrusive
 (map! :after company :map company-active-map
       "C-g" nil
@@ -154,8 +168,13 @@
 ; cursor nav
 (map! :nmv "j" #'evil-next-visual-line)
 (map! :nmv "k" #'evil-previous-visual-line)
-(map! :nm "C-k" (lambda () (interactive) (evil-scroll-line-down 8)))
-(map! :nm "C-j" (lambda () (interactive) (evil-scroll-line-up 8)))
+(map! :nm "C-k" (lambda () (interactive) (evil-scroll-line-down 8))
+      :iv "C-k" #'evil-force-normal-state
+      :nm "C-j" (lambda () (interactive) (evil-scroll-line-up 8))
+      :iv "C-j" #'evil-force-normal-state)
+(map! :after (evil-org org) :map (org-mode-map evil-org-mode-map)
+      :nmiv "C-k" nil
+      :nmiv "C-j" nil)
 (map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2))))
 (map! :nm "C-u" (lambda () (interactive) (evil-scroll-line-down (/ (window-height) 2))))
 (map! :nmv "J" (kbd "3j"))
