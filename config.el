@@ -50,12 +50,11 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-
 ;; paths
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq my-org-dir (if (file-exists-p "macc")
-                         "~/cut/org"
-                       "~/org"))
+                     "~/cut/org"
+                   "~/org"))
 
 ;; $ touch arista
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
