@@ -197,14 +197,15 @@
 ; cursor nav
 (map! :nmv "j" #'evil-next-visual-line)
 (map! :nmv "k" #'evil-previous-visual-line)
-(map! :nm "C-k" (lambda () (interactive) (evil-scroll-line-down 8))
-      :iv "C-k" #'evil-force-normal-state
-      :nm "C-j" (lambda () (interactive) (evil-scroll-line-up 8))
-      :iv "C-j" #'evil-force-normal-state)
+(map! :nmv "C-k" (lambda () (interactive) (evil-scroll-line-down 8))
+      :i "C-k" #'evil-force-normal-state
+      :nmv "C-j" (lambda () (interactive) (evil-scroll-line-up 8))
+      :i "C-j" #'evil-force-normal-state)
 (map! :after (evil-org org) :map (org-mode-map evil-org-mode-map)
       :nmiv "C-k" nil
       :nmiv "C-j" nil)
-(map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2))))
+(map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2)))
+      (:after rjsx-mode :map rjsx-mode-map :nm "C-d" nil))
 (map! :nm "C-u" (lambda () (interactive) (evil-scroll-line-down (/ (window-height) 2))))
 (map! :nmv "J" (kbd "3j"))
 (map! :nmv "K" (kbd "3k"))
