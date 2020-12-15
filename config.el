@@ -28,7 +28,6 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org/")
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -51,10 +50,48 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-;; optional config
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(load! "arista.el" doom-private-dir t)
+;; paths
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq my-org-dir (if (file-exists-p "macc")
+                         "~/cut/org"
+                       "~/org"))
+
+;; $ touch arista
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(when (file-exists-p "arista")
+  (load-library "Arastra")
+  (map! :leader
+        (:prefix ("a" . "arista")
+         "a" #'a4-add
+         "e" #'a4-edit
+         "r" #'a4-revert
+         "b" #'a4-bug
+         "s" #'a4-gid2
+         "d" #'a4-gid2-defs
+         ))
+  (add-to-list 'tramp-methods
+               '("a4ssh"
+                 (tramp-login-program "a4 ssh")
+                 (tramp-login-args
+                  (("-l" "%u")
+                   ("-p" "%p")
+                   ("%c")
+                   ("-e" "none")
+                   ("%h")))
+                 (tramp-async-args
+                  (("-q")))
+                 (tramp-remote-shell "/bin/sh")
+                 (tramp-remote-shell-login
+                  ("-l"))
+                 (tramp-remote-shell-args
+                  ("-c"))
+                 (tramp-gw-args
+                  (("-o" "GlobalKnownHostsFile=/dev/null")
+                   ("-o" "UserKnownHostsFile=/dev/null")
+                   ("-o" "StrictHostKeyChecking=no")))
+                 (tramp-default-port 22)
+                 (tramp-connection-timeout 10))))
 
 ;; look / feel
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -63,24 +100,23 @@
 (setq display-line-numbers-type nil)
 
 (after! avy
-  (setq avy-all-windows t)
-  )
+  (setq avy-all-windows t))
 
 (after! swiper
-  (setq swiper-action-recenter nil)
-  )
+  (setq swiper-action-recenter nil))
 
 (after! ivy
-  (setq ivy-use-virtual-buffers t)
-  )
+  (setq ivy-use-virtual-buffers t))
 
 (after! evil
   (setq evil-move-cursor-back nil)
-  (setq evil-cross-lines t)
-  )
+  (setq evil-cross-lines t))
+
+(after! org
+  (setq org-directory my-org-dir))
 
 (after! org-roam
-  (setq org-roam-directory "/Users/ryan/cut/org")
+  (setq org-roam-directory my-org-dir)
   (setq org-roam-index-file "index.org")
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam-capture--get-point)
@@ -94,8 +130,7 @@
 
 
 "
-           :unnarrowed t)))
-  )
+           :unnarrowed t))))
 
 (custom-set-faces!
   '(eros-result-overlay-face :background nil)
@@ -196,6 +231,7 @@
 (map! :n "U" #'evil-redo)
 
 ; search
+(map! :nm "gm" #'+lookup/documentation)
 (map! :nmv "/" #'swiper)
 (map! :nmv "?" #'swiper-backward)
 (map! :nmv "*" #'swiper-thing-at-point)
