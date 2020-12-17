@@ -139,7 +139,7 @@
   '(avy-lead-face :background "red" :foreground "white")
   '(avy-lead-face-0 :background "red" :foreground "white")
   '(avy-lead-face-1 :background "red" :foreground "white")
-  '(avy-lead-face-1 :background "red" :foreground "white")
+  '(avy-lead-face-2 :background "red" :foreground "white")
   )
 
 ;; keybinds
