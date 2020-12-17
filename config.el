@@ -52,13 +52,13 @@
 
 ;; paths
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq my-org-dir (if (file-exists-p "macc")
+(setq my-org-dir (if (file-exists-p! "macc" doom-private-dir)
                      "~/cut/org"
                    "~/org"))
 
 ;; $ touch arista
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(when (file-exists-p "arista")
+(when (file-exists-p! "arista" doom-private-dir)
   (load-library "Arastra")
   (map! :leader
         (:prefix ("a" . "arista")
