@@ -160,6 +160,17 @@
        :desc "Open scratch buffer" "x" #'doom/switch-to-project-scratch-buffer
        "X" nil))
 
+; org leader bindings
+(map! :leader
+      (:prefix "n"
+       "i" nil
+       (:prefix ("i" . "insert")
+        "f" #'org-roam-insert
+        "l" #'org-insert-link
+        "s" #'org-insert-last-stored-link)
+       "/" #'+default/org-notes-search
+       :desc "org-store-link" "s" #'org-store-link))
+
 ;buffer / window management
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
 
@@ -202,12 +213,16 @@
 (map! :nmv "C-k" (lambda () (interactive) (evil-scroll-line-down 8))
       :i "C-k" #'evil-force-normal-state
       :nmv "C-j" (lambda () (interactive) (evil-scroll-line-up 8))
-      :i "C-j" #'evil-force-normal-state)
-(map! :after (evil-org org) :map (org-mode-map evil-org-mode-map)
-      :nmiv "C-k" nil
-      :nmiv "C-j" nil)
+      :i "C-j" #'evil-force-normal-state
+      (:after (evil-org org) :map (org-mode-map evil-org-mode-map)
+       :nmiv "C-k" nil
+       :nmiv "C-j" nil)
+      (:after magit :map magit-mode-map
+       :nm "C-k" nil
+       :nm "C-j" nil))
 (map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2)))
-      (:after rjsx-mode :map rjsx-mode-map :nm "C-d" nil))
+      (:after rjsx-mode :map rjsx-mode-map :nm "C-d" nil)
+      (:after magit :map magit-mode-map :nm "C-d" nil))
 (map! :nm "C-u" (lambda () (interactive) (evil-scroll-line-down (/ (window-height) 2))))
 (map! :nmv "J" (kbd "3j"))
 (map! :nmv "K" (kbd "3k"))
@@ -219,6 +234,14 @@
 (map! :n "gb" #'better-jumper-jump-backward)
 (map! :n "gf" #'better-jumper-jump-forward)
 (map! :nmv "gc" #'goto-last-change)
+(map! :nm "C-n" nil
+      :nm "C-p" nil
+      (:after org :map org-mode-map
+       "C-n" #'org-next-visible-heading
+       "C-p" #'org-previous-visible-heading)
+      (:after magit :map magit-mode-map
+       "C-n" #'magit-section-forward
+       "C-p" #'magit-section-backward))
 
 ; text objects
 (defmacro define-and-bind-text-object (key start-regex end-regex)
@@ -232,9 +255,9 @@
        (define-key evil-inner-text-objects-map ,key (quote ,inner-name))
        (define-key evil-outer-text-objects-map ,key (quote ,outer-name)))))
 
+(define-and-bind-text-object "l" "^\\s-*" "\\s-*$")
 (map! :textobj "b" #'evil-textobj-anyblock-inner-block #'evil-textobj-anyblock-a-block)
 (map! :textobj ";" #'evilnc-inner-comment #'evilnc-outer-commenter)
-(define-and-bind-text-object "l" "^\\s-*" "\\s-*$")
 (map! :textobj "c" nil nil)
 (map! :v "v" #'er/expand-region)
 (after! expand-region (setq expand-region-contract-fast-key "V"))
