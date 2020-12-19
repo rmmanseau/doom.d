@@ -149,6 +149,10 @@
 (map! :leader
       :desc "M-x" ";" #'counsel-M-x
       :desc "Eval expression" ":" #'pp-eval-expression
+      :desc "Org capture" "x" #'org-capture
+      "X" nil
+      :desc "Search dir" "?" #'+default/search-other-cwd
+      :desc "Search for symbol in dir" "#" #'+default/search-other-cwd
       (:prefix "w" ; window
        "-" #'evil-window-split
        "\\" #'evil-window-vsplit
@@ -156,9 +160,14 @@
       (:prefix "TAB"
        "j" #'+workspace/switch-left
        "k" #'+workspace/switch-right)
-      )
+      (:prefix "b"
+       :desc "Open scratch buffer" "x" #'doom/switch-to-scratch-buffer
+       "X" nil)
+      (:prefix "p"
+       :desc "Open scratch buffer" "x" #'doom/switch-to-project-scratch-buffer
+       "X" nil))
 
-; buffer / window management
+;buffer / window management
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
 
 (map! :nmiv "C-o" #'evil-window-next
@@ -219,15 +228,28 @@
 (map! :nmv "gc" #'goto-last-change)
 
 ; text objects
+(defmacro define-and-bind-text-object (key start-regex end-regex)
+  (let ((inner-name (make-symbol "inner-name"))
+        (outer-name (make-symbol "outer-name")))
+    `(progn
+       (evil-define-text-object ,inner-name (count &optional beg end type)
+         (evil-select-paren ,start-regex ,end-regex beg end type count nil))
+       (evil-define-text-object ,outer-name (count &optional beg end type)
+         (evil-select-paren ,start-regex ,end-regex beg end type count t))
+       (define-key evil-inner-text-objects-map ,key (quote ,inner-name))
+       (define-key evil-outer-text-objects-map ,key (quote ,outer-name)))))
+
 (map! :textobj "b" #'evil-textobj-anyblock-inner-block #'evil-textobj-anyblock-a-block)
 (map! :textobj ";" #'evilnc-inner-comment #'evilnc-outer-commenter)
+(define-and-bind-text-object "l" "^\\s-*" "\\s-*$")
 (map! :textobj "c" nil nil)
 (map! :v "v" #'er/expand-region)
-(after! expand-region (setq expand-region-contract-fast-key "c"))
+(after! expand-region (setq expand-region-contract-fast-key "V"))
 
 ; editing
 (map! :nmv "gj" #'evil-join)
 (map! :nmv "g;" #'comment-line)
+(map! :nmv "go" (lambda () (interactive) (+evil/insert-newline-below 1) (evil-next-visual-line)))
 (map! :n "U" #'evil-redo)
 
 ; search
@@ -240,4 +262,7 @@
       (:map undo-fu-mode-map
       "C-/" nil
       "C-_" nil)) ; C-_ is terminal bind for C-/
-(map! :leader "?" #'swiper-all)
+(map! :after ivy
+      (:map ivy-minibuffer-map
+       "C-p" #'evil-paste-after
+       "C-w" #'+ivy/woccur))
