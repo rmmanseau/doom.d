@@ -118,11 +118,22 @@
   (setq org-roam-directory my-org-dir)
   (setq org-roam-index-file "index.org")
   (setq org-roam-capture-templates
-        '(("d" "default" plain (function org-roam-capture--get-point)
+        '(("n" "note" plain (function org-roam-capture--get-point)
            "%?"
            :file-name "${slug}"
            :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+CREATED: %u\n#+ROAM_TAGS:\n\n- related ::\n\n"
-           :unnarrowed t))))
+           :unnarrowed t)))
+  (setq org-roam-dailies-capture-templates
+        '(("x" "default" entry #'org-roam-capture--get-point
+           "* %?"
+           :file-name "daily/%<%Y-%m-%d>"
+           :head "#+title: %<%Y-%m-%d>\n"
+           :olp ("Fleets"))
+        ("j" "journal" entry #'org-roam-capture--get-point
+           "* %?"
+           :file-name "daily/%<%Y-%m-%d>"
+           :head "#+title: %<%Y-%m-%d>\n"
+           :olp ("Journal")))))
 
 (custom-set-faces!
   '(eros-result-overlay-face :background nil)
@@ -142,10 +153,13 @@
 (map! :leader
       :desc "M-x" ";" #'counsel-M-x
       :desc "Eval expression" ":" #'pp-eval-expression
-      :desc "Org capture" "x" #'org-capture
-      "X" nil
       :desc "Search dir" "?" #'+default/search-other-cwd
-      :desc "Search for symbol in dir" "#" #'+default/search-other-cwd
+      "X" nil
+      "x" nil
+      (:prefix ("x" . "Capture")
+       :desc "Org capture" "o" #'org-capture
+       :desc "Roam capture" "n" #'org-roam-capture
+       :desc "Dailies capture" "x" #'org-roam-dailies-capture-today)
       (:prefix "w" ; window
        "-" #'evil-window-split
        "\\" #'evil-window-vsplit
@@ -164,12 +178,38 @@
 (map! :leader
       (:prefix "n"
        "i" nil
-       (:prefix ("i" . "insert")
+       "d" nil
+       "n" nil
+       "N" nil
+       "S" nil
+       "c" nil
+       "C" nil
+       "o" nil
+       "v" nil
+       "m" nil
+       "l" nil
+       "/" #'+default/org-notes-search
+       "x" #'org-roam-dailies-capture-today
+       :desc "Switch to buffer" "b" #'org-roam-switch-to-buffer
+       :desc "Find note" "f" #'org-roam-find-file
+       :desc "Find file" "F" #'+default/find-in-notes
+       :desc "Browse dir" "D" #'+default/browse-notes
+       :desc "Store link" "s" #'org-store-link
+       :desc "Show backlinks" "l" #'org-roam
+       :desc "Show backlinks" "l" #'org-roam
+       (:prefix ("i" . "Insert")
         "f" #'org-roam-insert
+        "i" #'org-roam-insert
         "l" #'org-insert-link
         "s" #'org-insert-last-stored-link)
-       "/" #'+default/org-notes-search
-       :desc "org-store-link" "s" #'org-store-link))
+       (:prefix ("d" . "Dailies")
+        "d" #'org-roam-dailies-find-date
+        "t" #'org-roam-dailies-find-today
+        "m" #'org-roam-dailies-find-tomorrow
+        "y" #'org-roam-dailies-find-yesterday
+        "h" #'org-roam-dailies-find-previous-note
+        "l" #'org-roam-dailies-find-next-note)
+       ))
 
 ;buffer / window management
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
