@@ -121,7 +121,7 @@
         '(("d" "default" plain (function org-roam-capture--get-point)
            "%?"
            :file-name "${slug}"
-           :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+CREATED: %u\n\n- tags ::\n\n"
+           :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+CREATED: %u\n#+ROAM_TAGS:\n\n- related ::\n\n"
            :unnarrowed t))))
 
 (custom-set-faces!
