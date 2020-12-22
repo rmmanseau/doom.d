@@ -208,6 +208,7 @@
       "C-@" #'company-complete-selection) ; C-@ is terminal bind for C-SPC
 
 ; cursor nav
+(map! :map compilation-mode-map "h" nil)
 (map! :nmv "j" #'evil-next-visual-line)
 (map! :nmv "k" #'evil-previous-visual-line)
 (map! :nmv "C-k" (lambda () (interactive) (evil-scroll-line-down 8))
