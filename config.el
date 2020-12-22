@@ -97,6 +97,7 @@
 
 (setq doom-theme 'doom-molokai)
 (setq display-line-numbers-type nil)
+(setq confirm-kill-emacs nil)
 
 (unless (display-graphic-p)
   ;; activate mouse-based scrolling
