@@ -194,13 +194,13 @@
        "m" nil
        "l" nil
        "/" #'+default/org-notes-search
-       "x" #'org-roam-dailies-capture-today
+       :desc "Dailies capture" "x" #'org-roam-dailies-capture-today
+       :desc "Note capture" "n" #'org-roam-capture
        :desc "Switch to buffer" "b" #'org-roam-switch-to-buffer
        :desc "Find note" "f" #'org-roam-find-file
        :desc "Find file" "F" #'+default/find-in-notes
        :desc "Browse dir" "D" #'+default/browse-notes
        :desc "Store link" "s" #'org-store-link
-       :desc "Show backlinks" "l" #'org-roam
        :desc "Show backlinks" "l" #'org-roam
        (:prefix ("i" . "Insert")
         "f" #'org-roam-insert
