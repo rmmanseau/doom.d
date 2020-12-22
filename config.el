@@ -98,6 +98,11 @@
 (setq doom-theme 'doom-molokai)
 (setq display-line-numbers-type nil)
 
+(unless (display-graphic-p)
+  ;; activate mouse-based scrolling
+  (map! "<mouse-4>" #'evil-scroll-line-up
+        "<mouse-5>" #'evil-scroll-line-down))
+
 (after! avy
   (setq avy-all-windows t))
 
