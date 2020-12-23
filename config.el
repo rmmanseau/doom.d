@@ -55,6 +55,8 @@
 (setq my-org-dir (if (file-exists-p! "macc" doom-private-dir)
                      "~/cut/org"
                    "~/org"))
+(setq citation-dir (concat my-org-dir "/cite"))
+(setq citation-bib (concat citation-dir "/zot.bib"))
 
 ;; $ touch arista
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -125,21 +127,42 @@
   (setq org-roam-index-file "index.org")
   (setq org-roam-capture-templates
         '(("n" "note" plain (function org-roam-capture--get-point)
-           "%?"
+           "%i %?"
            :file-name "${slug}"
-           :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+CREATED: %u\n#+ROAM_TAGS:\n\n- related ::\n\n"
+           :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+ROAM_TAGS:\n#+CREATED: %u\n\n- related ::\n\n"
            :unnarrowed t)))
   (setq org-roam-dailies-capture-templates
-        '(("x" "default" entry #'org-roam-capture--get-point
-           "* %?"
+        '(("x" "default" item #'org-roam-capture--get-point
+           "- %?"
            :file-name "daily/%<%Y-%m-%d>"
-           :head "#+title: %<%Y-%m-%d>\n"
-           :olp ("Fleets"))
-        ("j" "journal" entry #'org-roam-capture--get-point
-           "* %?"
-           :file-name "daily/%<%Y-%m-%d>"
-           :head "#+title: %<%Y-%m-%d>\n"
-           :olp ("Journal")))))
+           :head "#+TITLE: %<%Y-%m-%d>\n#+ROAM_TAGS: daily\n\n* Fleeting\n* Archived\n* Journal\n"
+           :olp ("Fleeting")))))
+
+(after! bibtex
+  (setq! bibtex-completion-notes-path citation-dir
+         bibtex-completion-bibliography citation-bib
+         ivy-bibtex-default-action #'ivy-bibtex-edit-notes))
+
+(use-package! org-ref
+    :after org
+    :config
+    (org-ref-ivy-cite-completion)
+    (setq! org-ref-default-bibliography (list citation-bib)
+           org-ref-notes-directory citation-dir
+           org-ref-notes-function #'orb-edit-notes))
+
+(use-package! org-roam-bibtex
+    :after org-roam
+    :hook (org-roam-mode . org-roam-bibtex-mode)
+    :config
+    (setq! orb-insert-link-description 'citekey
+           orb-insert-interface 'ivy-bibtex
+           orb-templates
+           '(("r" "ref" plain #'org-roam-capture--get-point
+              "%?"
+              :file-name "cite/${citekey}"
+              :head "#+TITLE: ${author} - ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: cite\n#+CREATED: %u\n\n"
+              :unnarrowed t))))
 
 (custom-set-faces!
   '(eros-result-overlay-face :background nil)
@@ -164,8 +187,8 @@
       "x" nil
       (:prefix ("x" . "Capture")
        :desc "Org capture" "o" #'org-capture
-       :desc "Roam capture" "n" #'org-roam-capture
-       :desc "Dailies capture" "x" #'org-roam-dailies-capture-today)
+       :desc "New note" "n" #'org-roam-capture
+       :desc "Fleeting note" "x" #'org-roam-dailies-capture-today)
       (:prefix "w" ; window
        "-" #'evil-window-split
        "\\" #'evil-window-vsplit
@@ -197,17 +220,17 @@
        "/" #'+default/org-notes-search
        :desc "Dailies capture" "x" #'org-roam-dailies-capture-today
        :desc "Note capture" "n" #'org-roam-capture
-       :desc "Switch to buffer" "b" #'org-roam-switch-to-buffer
+       :desc "Ivy Bibtex" "b" #'ivy-bibtex
        :desc "Find note" "f" #'org-roam-find-file
        :desc "Find file" "F" #'+default/find-in-notes
        :desc "Browse dir" "D" #'+default/browse-notes
        :desc "Store link" "s" #'org-store-link
        :desc "Show backlinks" "l" #'org-roam
        (:prefix ("i" . "Insert")
-        "f" #'org-roam-insert
-        "i" #'org-roam-insert
-        "l" #'org-insert-link
-        "s" #'org-insert-last-stored-link)
+        :desc "roam file" "f" #'org-roam-insert
+        :desc "citation" "c" #'orb-insert
+        :desc "link" "l" #'org-insert-link
+        :desc "last stored link" "s" #'org-insert-last-stored-link)
        (:prefix ("d" . "Dailies")
         "d" #'org-roam-dailies-find-date
         "t" #'org-roam-dailies-find-today
