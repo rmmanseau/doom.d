@@ -125,8 +125,7 @@
 (after! bibtex
   (setq! bibtex-completion-notes-path citation-dir
          bibtex-completion-bibliography citation-bib
-         ivy-bibtex-default-action #'ivy-bibtex-edit-notes
-         ))
+         ivy-bibtex-default-action #'ivy-bibtex-edit-notes))
 
 (use-package! org-ref
     :after org
@@ -134,8 +133,21 @@
     (org-ref-ivy-cite-completion)
     (setq! org-ref-default-bibliography (list citation-bib)
            org-ref-notes-directory citation-dir
-           org-ref-notes-function #'orb-edit-notes-ad
-           ))
+           org-ref-notes-function #'orb-edit-notes-ad))
+
+(use-package! org-roam-bibtex
+    :after org-roam
+    :hook (org-roam-mode . org-roam-bibtex-mode)
+    :config
+    (setq!
+     orb-insert-link-description 'citekey
+     orb-insert-interface 'ivy-bibtex
+     orb-templates
+     '(("r" "ref" plain #'org-roam-capture--get-point
+        "%?"
+        :file-name "${citekey}"
+        :head "#+TITLE: ${author} - ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: citation\n#+CREATED: %u\n\n* INBOX\n* ARCHIVE\n"
+        :unnarrowed t))))
 
 (after! org-roam
   (setq org-roam-directory my-org-dir)
@@ -226,27 +238,8 @@
     (my/org-roam-dailies--capture (current-time) nil "x"))
   (defun my/org-roam-dailies-capture-today-journal (&optional goto keys)
     (interactive "P")
-    (my/org-roam-dailies--capture (current-time) nil "j"))
+    (my/org-roam-dailies--capture (current-time) nil "j")))
 
-  (map! :leader
-      (:prefix ("x" . "Capture")
-       :desc "Fleet" "x" #'my/org-roam-dailies-capture-today-fleet
-       :desc "Cited Fleet" "c" #'my/org-roam-capture-existing-citation
-       :desc "Journal Entry" "j" #'my/org-roam-dailies-capture-today-journal
-       :desc "Note" "n" #'org-roam-capture)))
-
-(use-package! org-roam-bibtex
-    :after org-roam
-    :hook (org-roam-mode . org-roam-bibtex-mode)
-    :config
-    (setq! orb-insert-link-description 'citekey
-           orb-insert-interface 'ivy-bibtex
-           orb-templates
-           '(("r" "ref" plain #'org-roam-capture--get-point
-              "%?"
-              :file-name "${citekey}"
-              :head "#+TITLE: ${author} - ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: citation\n#+CREATED: %u\n\n* INBOX\n* ARCHIVE\n"
-              :unnarrowed t))))
 
 (custom-set-faces!
   '(eros-result-overlay-face :background nil)
@@ -273,6 +266,11 @@
        "-" #'evil-window-split
        "\\" #'evil-window-vsplit
        "+" nil)
+      (:prefix ("x" . "Capture")
+       :desc "Fleet" "x" #'my/org-roam-dailies-capture-today-fleet
+       :desc "Cited Fleet" "c" #'my/org-roam-capture-existing-citation
+       :desc "Journal Entry" "j" #'my/org-roam-dailies-capture-today-journal
+       :desc "Note" "n" #'org-roam-capture)
       (:prefix "TAB"
        "j" #'+workspace/switch-left
        "k" #'+workspace/switch-right)
