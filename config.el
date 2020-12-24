@@ -120,28 +120,13 @@
   (setq evil-cross-lines t))
 
 (after! org
-  (setq org-directory my-org-dir))
-
-(after! org-roam
-  (setq org-roam-directory my-org-dir)
-  (setq org-roam-index-file "index.org")
-  (setq org-roam-capture-templates
-        '(("n" "note" plain (function org-roam-capture--get-point)
-           "%i %?"
-           :file-name "${slug}"
-           :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+ROAM_TAGS:\n#+CREATED: %u\n\n- related ::\n\n"
-           :unnarrowed t)))
-  (setq org-roam-dailies-capture-templates
-        '(("x" "default" item #'org-roam-capture--get-point
-           "- %?"
-           :file-name "daily/%<%Y-%m-%d>"
-           :head "#+TITLE: %<%Y-%m-%d>\n#+ROAM_TAGS: daily\n\n* Fleeting\n* Archived\n* Journal\n"
-           :olp ("Fleeting")))))
+  (setq! org-directory my-org-dir))
 
 (after! bibtex
   (setq! bibtex-completion-notes-path citation-dir
          bibtex-completion-bibliography citation-bib
-         ivy-bibtex-default-action #'ivy-bibtex-edit-notes))
+         ivy-bibtex-default-action #'ivy-bibtex-edit-notes
+         ))
 
 (use-package! org-ref
     :after org
@@ -149,7 +134,106 @@
     (org-ref-ivy-cite-completion)
     (setq! org-ref-default-bibliography (list citation-bib)
            org-ref-notes-directory citation-dir
-           org-ref-notes-function #'orb-edit-notes))
+           org-ref-notes-function #'orb-edit-notes-ad
+           ))
+
+(after! org-roam
+  (setq org-roam-directory my-org-dir)
+  (setq org-roam-index-file "index.org")
+  (setq org-roam-capture-templates
+        '(("n" "note" plain #'org-roam-capture--get-point
+           :file-name "${slug}"
+           :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+ROAM_TAGS:\n#+CREATED: %u\n\n- related ::\n\n"
+           :unnarrowed t)))
+  (setq my/org-roam-capture-templates
+        '(("c" "cite" item #'org-roam-capture--get-point
+           "- %? (pg. ${page-number})"
+           :file-name "${slug}"
+           :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+ROAM_TAGS:\n#+CREATED: %u\n\n- related ::\n\n"
+           :olp ("INBOX")
+           :empty-lines 1)))
+  (setq org-roam-dailies-capture-templates
+        '(("x" "fleet" item #'org-roam-capture--get-point
+           :file-name "daily/%<%Y-%m-%d>"
+           :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* INBOX\n* ARCHIVE"
+           :olp ("INBOX")
+           :empty-lines 1)
+          ("j" "journal" item #'org-roam-capture--get-point
+           :file-name "daily/%<%Y-%m-%d>"
+           :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* INBOX\n* ARCHIVE"
+           :olp ("JOURNAL")
+           :empty-lines 1)))
+
+  ;; custom org-roam capture stuff
+  (defun my/org-roam-capture--capture (&optional goto keys)
+    (let* ((org-capture-templates (mapcar #'org-roam-capture--convert-template my/org-roam-capture-templates))
+           (one-template-p (= (length org-capture-templates) 1))
+           org-capture-templates-contexts
+           (org-capture-link-is-already-stored t))
+      (when one-template-p
+        (setq keys (caar org-capture-templates)))
+      (if (or one-template-p
+              (eq org-roam-capture-function 'org-capture))
+          (org-capture goto keys)
+        (funcall-interactively org-roam-capture-function))))
+  (defun my/org-roam--get-title-path-completions-tag-filtered (tag-filter)
+    (let* ((rows (org-roam-db-query [:select [files:file titles:title tags:tags files:meta] :from titles
+                                     :left :join tags
+                                     :on (= titles:file tags:file)
+                                     :left :join files
+                                     :on (= titles:file files:file)]))
+           completions)
+      (setq rows (seq-sort-by (lambda (x)
+                                (plist-get (nth 3 x) :mtime))
+                              #'time-less-p
+                              rows))
+      (dolist (row rows completions)
+        (pcase-let ((`(,file-path ,title ,tags) row))
+          (let ((v (list title :path file-path :title title)))
+            (if (member tag-filter tags) (push v completions)))))))
+  (defun my/org-roam-capture--tag-filtered (tag-filter &optional goto keys)
+    (interactive "P")
+    (unless org-roam-mode (org-roam-mode))
+    (let* ((completions (my/org-roam--get-title-path-completions-tag-filtered tag-filter))
+           (title-with-keys (org-roam-completion--completing-read "File: "
+                                                                  completions
+                                                                  :require-match t))
+           (res (cdr (assoc title-with-keys completions)))
+           (title (or (plist-get res :title) title-with-keys))
+           (file-path (plist-get res :path)))
+      (let ((org-roam-capture--info (list (cons 'title title)
+                                          (cons 'slug (funcall org-roam-title-to-slug-function title))
+                                          (cons 'file file-path)))
+            (org-roam-capture--context 'capture))
+        (condition-case err
+            (my/org-roam-capture--capture goto keys)
+          (error (user-error "%s.  Please adjust `org-roam-capture-templates'"
+                             (error-message-string err)))))))
+  (defun my/org-roam-capture-existing-citation (&optional goto keys)
+    (interactive "P")
+    (my/org-roam-capture--tag-filtered "citation" goto keys))
+
+  ;; custom org-roam-dailies capture stuff
+  (defun my/org-roam-dailies--capture (time &optional goto keys)
+    (unless org-roam-mode (org-roam-mode))
+    (let ((org-roam-capture-templates (--> org-roam-dailies-capture-templates
+                                           (if goto (list (car it)) it)))
+          (org-roam-capture--info (list (cons 'time time)))
+          (org-roam-capture--context 'dailies))
+      (org-roam-capture--capture (when goto '(4)) keys)))
+  (defun my/org-roam-dailies-capture-today-fleet (&optional goto keys)
+    (interactive "P")
+    (my/org-roam-dailies--capture (current-time) nil "x"))
+  (defun my/org-roam-dailies-capture-today-journal (&optional goto keys)
+    (interactive "P")
+    (my/org-roam-dailies--capture (current-time) nil "j"))
+
+  (map! :leader
+      (:prefix ("x" . "Capture")
+       :desc "Fleet" "x" #'my/org-roam-dailies-capture-today-fleet
+       :desc "Cited Fleet" "c" #'my/org-roam-capture-existing-citation
+       :desc "Journal Entry" "j" #'my/org-roam-dailies-capture-today-journal
+       :desc "Note" "n" #'org-roam-capture)))
 
 (use-package! org-roam-bibtex
     :after org-roam
@@ -160,8 +244,8 @@
            orb-templates
            '(("r" "ref" plain #'org-roam-capture--get-point
               "%?"
-              :file-name "cite/${citekey}"
-              :head "#+TITLE: ${author} - ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: cite\n#+CREATED: %u\n\n"
+              :file-name "${citekey}"
+              :head "#+TITLE: ${author} - ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: citation\n#+CREATED: %u\n\n* INBOX\n* ARCHIVE\n"
               :unnarrowed t))))
 
 (custom-set-faces!
@@ -173,7 +257,7 @@
   '(avy-lead-face-0 :background "red" :foreground "white")
   '(avy-lead-face-1 :background "red" :foreground "white")
   '(avy-lead-face-2 :background "red" :foreground "white")
-  )
+  '(show-paren-match :background "brightblack" :foreground nil))
 
 ;; keybinds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -185,10 +269,6 @@
       :desc "Search dir" "?" #'+default/search-other-cwd
       "X" nil
       "x" nil
-      (:prefix ("x" . "Capture")
-       :desc "Org capture" "o" #'org-capture
-       :desc "New note" "n" #'org-roam-capture
-       :desc "Fleeting note" "x" #'org-roam-dailies-capture-today)
       (:prefix "w" ; window
        "-" #'evil-window-split
        "\\" #'evil-window-vsplit
@@ -217,27 +297,26 @@
        "v" nil
        "m" nil
        "l" nil
-       "/" #'+default/org-notes-search
-       :desc "Dailies capture" "x" #'org-roam-dailies-capture-today
-       :desc "Note capture" "n" #'org-roam-capture
-       :desc "Ivy Bibtex" "b" #'ivy-bibtex
-       :desc "Find note" "f" #'org-roam-find-file
-       :desc "Find file" "F" #'+default/find-in-notes
-       :desc "Browse dir" "D" #'+default/browse-notes
+       :desc "Search notes" "/" #'+default/org-notes-search
+       :desc "Today" "x" #'org-roam-dailies-find-today
+       :desc "Notes" "n" #'org-roam-find-file
+       :desc "Citations" "c" #'ivy-bibtex
+       :desc "Find file" "f" #'+default/find-in-notes
+       :desc "Browse files" "F" #'+default/browse-notes
        :desc "Store link" "s" #'org-store-link
-       :desc "Show backlinks" "l" #'org-roam
+       :desc "Show backlinks" "b" #'org-roam
        (:prefix ("i" . "Insert")
-        :desc "roam file" "f" #'org-roam-insert
+        :desc "note" "n" #'org-roam-insert
         :desc "citation" "c" #'orb-insert
         :desc "link" "l" #'org-insert-link
         :desc "last stored link" "s" #'org-insert-last-stored-link)
        (:prefix ("d" . "Dailies")
-        "d" #'org-roam-dailies-find-date
-        "t" #'org-roam-dailies-find-today
-        "m" #'org-roam-dailies-find-tomorrow
-        "y" #'org-roam-dailies-find-yesterday
-        "h" #'org-roam-dailies-find-previous-note
-        "l" #'org-roam-dailies-find-next-note)
+        :desc "Date" "d" #'org-roam-dailies-find-date
+        :desc "Today" "t" #'org-roam-dailies-find-today
+        :desc "Tomorrow" "m" #'org-roam-dailies-find-tomorrow
+        :desc "Yesterday" "y" #'org-roam-dailies-find-yesterday
+        :desc "Prev" "h" #'org-roam-dailies-find-previous-note
+        :desc "Next" "l" #'org-roam-dailies-find-next-note)
        ))
 
 ;buffer / window management
@@ -245,7 +324,7 @@
 
 (map! :nmiv "C-o" #'evil-window-next
       (:map compilation-mode-map "C-o" nil)
-      (:after help :map help-mode-map :n "C-o" nil))
+      (:after help :map help-mode-map :nm "C-o" nil))
 
 (map! :nmvg "C-b" #'ivy-switch-buffer
       (:map magit-mode-map :nv "C-b" nil)
@@ -312,6 +391,7 @@
       (:after magit :map magit-mode-map
        "C-n" #'magit-section-forward
        "C-p" #'magit-section-backward))
+(map! :g "C-p" #'evil-paste-after)
 
 ; text objects
 (defmacro define-and-bind-text-object (key start-regex end-regex)
