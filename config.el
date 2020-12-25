@@ -167,12 +167,12 @@
   (setq org-roam-dailies-capture-templates
         '(("x" "fleet" item #'org-roam-capture--get-point
            :file-name "daily/%<%Y-%m-%d>"
-           :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* INBOX\n* ARCHIVE"
+           :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* INBOX\n* ARCHIVE\n"
            :olp ("INBOX")
            :empty-lines 1)
           ("j" "journal" item #'org-roam-capture--get-point
            :file-name "daily/%<%Y-%m-%d>"
-           :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* INBOX\n* ARCHIVE"
+           :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* INBOX\n* ARCHIVE\n"
            :olp ("JOURNAL")
            :empty-lines 1)))
 
@@ -335,6 +335,12 @@
 
 (map! :nmvg "C-f" #'counsel-find-file
       (:map magit-mode-map :nv "C-f" nil)
+      (:map counsel-find-file-map "C-f"
+       (lambda ()
+         (interactive)
+         (ivy-exit-with-action
+          (lambda (str)
+            (projectile-find-file-in-directory str)))))
       (:map ivy-switch-buffer-map "C-f"
        (lambda ()
          (interactive)
