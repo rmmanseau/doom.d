@@ -101,8 +101,11 @@
 (setq display-line-numbers-type nil)
 (setq confirm-kill-emacs nil)
 
+;; popup stuff
+(plist-put +popup-defaults :modeline t)
+
+;; activate mouse-based scrolling
 (unless (display-graphic-p)
-  ;; activate mouse-based scrolling
   (map! "<mouse-4>" #'evil-scroll-line-up
         "<mouse-5>" #'evil-scroll-line-down))
 
@@ -120,7 +123,35 @@
   (setq evil-cross-lines t))
 
 (after! org
-  (setq! org-directory my-org-dir))
+  ;; dont create new file when capture is cancelled
+  (set-popup-rules!
+    '(("^CAPTURE-.*\\.org$" :autosave 'ignore)))
+
+  (setq! org-directory my-org-dir
+         org-capture-templates
+         '(("t" "Personal todo" entry
+            (file+headline +org-capture-todo-file "Inbox")
+            "* [ ] %?\n%i\n%a" :prepend t)
+           ("n" "Personal notes" entry
+            (file+headline +org-capture-notes-file "Inbox")
+            "* %u %?\n%i\n%a" :prepend t)
+           ("j" "Journal" entry
+            (file+olp+datetree +org-capture-journal-file)
+            "* %U %?\n%i\n%a" :prepend t)
+           ("p" "Templates for projects")
+           ("pt" "Project-local todo" entry
+            (file+headline +org-capture-project-todo-file "Inbox")
+            "* TODO %?\n%i\n%a" :prepend t)
+           ("pn" "Project-local notes" entry
+            (file+headline +org-capture-project-notes-file "Inbox")
+            "* %U %?\n%i\n%a" :prepend t)
+           ("pc" "Project-local changelog" entry
+            (file+headline +org-capture-project-changelog-file "Unreleased")
+            "* %U %?\n%i\n%a" :prepend t)
+           ("o" "Centralized templates for projects")
+           ("ot" "Project todo" entry #'+org-capture-central-project-todo-file "* TODO %?\n %i\n %a" :heading "Tasks" :prepend nil)
+           ("on" "Project notes" entry #'+org-capture-central-project-notes-file "* %U %?\n %i\n %a" :heading "Notes" :prepend t)
+           ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file "* %U %?\n %i\n %a" :heading "Changelog" :prepend t))))
 
 (after! bibtex
   (setq! bibtex-completion-notes-path citation-dir
@@ -146,34 +177,32 @@
      '(("r" "ref" plain #'org-roam-capture--get-point
         "%?"
         :file-name "${citekey}"
-        :head "#+TITLE: ${author} - ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: citation\n#+CREATED: %u\n\n* INBOX\n* ARCHIVE\n"
+        :head "#+TITLE: ${citekey} [ ${title}, ${author} ]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: citation\n#+CREATED: %u\n\n* INBOX\n* ARCHIVE\n"
         :unnarrowed t))))
 
 (after! org-roam
   (setq org-roam-directory my-org-dir)
   (setq org-roam-index-file "index.org")
+  (setq +org-roam-open-buffer-on-find-file nil)
   (setq org-roam-capture-templates
         '(("n" "note" plain #'org-roam-capture--get-point
+           "%?"
            :file-name "${slug}"
            :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+ROAM_TAGS:\n#+CREATED: %u\n\n- related ::\n\n"
            :unnarrowed t)))
   (setq my/org-roam-capture-templates
-        '(("c" "cite" item #'org-roam-capture--get-point
-           "- %? (pg. ${page-number})"
+        '(("c" "cite" entry #'org-roam-capture--get-point
+           "*** FLEET[C] : %?\n(pg. ${page-number})"
            :file-name "${slug}"
-           :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+ROAM_TAGS:\n#+CREATED: %u\n\n- related ::\n\n"
            :olp ("INBOX")
+           :head "\n* INBOX\n* ARCHIVE\n"
            :empty-lines 1)))
   (setq org-roam-dailies-capture-templates
-        '(("x" "fleet" item #'org-roam-capture--get-point
+        '(("x" "fleet" entry #'org-roam-capture--get-point
+           "*** FLEET : %? "
            :file-name "daily/%<%Y-%m-%d>"
            :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* INBOX\n* ARCHIVE\n"
            :olp ("INBOX")
-           :empty-lines 1)
-          ("j" "journal" item #'org-roam-capture--get-point
-           :file-name "daily/%<%Y-%m-%d>"
-           :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* INBOX\n* ARCHIVE\n"
-           :olp ("JOURNAL")
            :empty-lines 1)))
 
   ;; custom org-roam capture stuff
@@ -268,9 +297,9 @@
        "+" nil)
       (:prefix ("x" . "Capture")
        :desc "Fleet" "x" #'my/org-roam-dailies-capture-today-fleet
-       :desc "Cited Fleet" "c" #'my/org-roam-capture-existing-citation
-       :desc "Journal Entry" "j" #'my/org-roam-dailies-capture-today-journal
-       :desc "Note" "n" #'org-roam-capture)
+       :desc "Citation Fleet" "c" #'my/org-roam-capture-existing-citation
+       :desc "Note" "n" #'org-roam-capture
+       :desc "Bib Note" "b" #'ivy-bibtex)
       (:prefix "TAB"
        "j" #'+workspace/switch-left
        "k" #'+workspace/switch-right)
@@ -355,7 +384,6 @@
 ; make autocomplete popup less intrusive
 (map! :after company :map company-active-map
       "C-g" nil
-      "RET" nil
       "C-SPC" #'company-complete-selection
       "C-@" #'company-complete-selection) ; C-@ is terminal bind for C-SPC
 
@@ -363,10 +391,10 @@
 (map! :map compilation-mode-map "h" nil)
 (map! :nmv "j" #'evil-next-visual-line)
 (map! :nmv "k" #'evil-previous-visual-line)
-(map! :nmv "C-k" (lambda () (interactive) (evil-scroll-line-down 8))
-      :i "C-k" #'evil-force-normal-state
-      :nmv "C-j" (lambda () (interactive) (evil-scroll-line-up 8))
-      :i "C-j" #'evil-force-normal-state
+(map! :nmvi "C-k" (lambda () (interactive) (evil-scroll-line-down 8))
+      ;; :i "C-k" #'evil-force-normal-state
+      :nmvi "C-j" (lambda () (interactive) (evil-scroll-line-up 8))
+      ;; :i "C-j" #'evil-force-normal-state
       (:after (evil-org org) :map (org-mode-map evil-org-mode-map)
        :nmiv "C-k" nil
        :nmiv "C-j" nil)
@@ -419,7 +447,6 @@
 ; editing
 (map! :nmv "gj" #'evil-join)
 (map! :nmv "g;" #'comment-line)
-(map! :nmv "go" (lambda () (interactive) (+evil/insert-newline-below 1) (evil-next-visual-line)))
 (map! :n "U" #'evil-redo)
 
 ; search
