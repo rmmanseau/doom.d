@@ -58,3 +58,4 @@
 (unpin! bibtex-completion helm-bibtex ivy-bibtex)
 
 (package! org-ref)
+(package! visual-fill-column)

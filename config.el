@@ -100,6 +100,7 @@
 (setq doom-theme 'doom-molokai)
 (setq display-line-numbers-type nil)
 (setq confirm-kill-emacs nil)
+(setq! visual-fill-column-width 100)
 
 ;; popup stuff
 (plist-put +popup-defaults :modeline t)
@@ -122,10 +123,12 @@
   (setq evil-move-cursor-back nil)
   (setq evil-cross-lines t))
 
+
 (after! org
   ;; dont create new file when capture is cancelled
   (set-popup-rules!
     '(("^CAPTURE-.*\\.org$" :autosave 'ignore)))
+  (add-hook! org-mode #'visual-fill-column-mode)
 
   (setq! org-directory my-org-dir
          org-capture-templates
@@ -186,20 +189,20 @@
   (setq +org-roam-open-buffer-on-find-file nil)
   (setq org-roam-capture-templates
         '(("n" "note" plain #'org-roam-capture--get-point
-           "%?"
+           "%?\n"
            :file-name "${slug}"
            :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+ROAM_TAGS:\n#+CREATED: %u\n\n- related ::\n\n"
            :unnarrowed t)))
   (setq my/org-roam-capture-templates
         '(("c" "cite" entry #'org-roam-capture--get-point
-           "*** FLEET[C] : %?\n(pg. ${page-number})"
+           "** FLEET[C] : %?\n(pg. ${page-number})\n"
            :file-name "${slug}"
            :olp ("INBOX")
            :head "\n* INBOX\n* ARCHIVE\n"
            :empty-lines 1)))
   (setq org-roam-dailies-capture-templates
         '(("x" "fleet" entry #'org-roam-capture--get-point
-           "*** FLEET : %? "
+           "** FLEET : %?\n"
            :file-name "daily/%<%Y-%m-%d>"
            :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* INBOX\n* ARCHIVE\n"
            :olp ("INBOX")
@@ -269,7 +272,6 @@
     (interactive "P")
     (my/org-roam-dailies--capture (current-time) nil "j")))
 
-
 (custom-set-faces!
   '(eros-result-overlay-face :background nil)
   '(ivy-modified-buffer :foreground nil :inherit font-lock-doc-face)
@@ -279,7 +281,18 @@
   '(avy-lead-face-0 :background "red" :foreground "white")
   '(avy-lead-face-1 :background "red" :foreground "white")
   '(avy-lead-face-2 :background "red" :foreground "white")
-  '(show-paren-match :background "brightblack" :foreground nil))
+  '(show-paren-match :background "brightblack" :foreground nil)
+
+  '(org-document-title :background nil :foreground "#e2c770" :weight ultra-bold)
+  '(org-default :background nil :foreground "white")
+  '((org-level-1 org-level-2 org-level-3 org-level-4 org-level-5 org-level-6 org-level-7 org-level-8)
+    :background nil :foreground "brightwhite" :weight bold )
+  '((org-link org-roam-link org-roam-link-current ) :background nil :foreground "#8fc3ff" :weight normal)
+  '((org-link-invalid org-roam-link-shielded) :background nil :foreground "brightred" :weight normal)
+  '(org-date :foreground "white" :background "#101010" )
+  '((org-tag org-tag-group org-list-dt) :foreground "#9c91e4")
+
+  )
 
 ;; keybinds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -392,9 +405,7 @@
 (map! :nmv "j" #'evil-next-visual-line)
 (map! :nmv "k" #'evil-previous-visual-line)
 (map! :nmvi "C-k" (lambda () (interactive) (evil-scroll-line-down 8))
-      ;; :i "C-k" #'evil-force-normal-state
       :nmvi "C-j" (lambda () (interactive) (evil-scroll-line-up 8))
-      ;; :i "C-j" #'evil-force-normal-state
       (:after (evil-org org) :map (org-mode-map evil-org-mode-map)
        :nmiv "C-k" nil
        :nmiv "C-j" nil)
@@ -445,7 +456,8 @@
 (after! expand-region (setq expand-region-contract-fast-key "V"))
 
 ; editing
-(map! :nmv "gj" #'evil-join)
+(map! :nmv "gj" #'evil-join
+      (:map org-mode-map :n "gj" nil))
 (map! :nmv "g;" #'comment-line)
 (map! :n "U" #'evil-redo)
 
