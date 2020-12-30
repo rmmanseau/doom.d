@@ -59,3 +59,4 @@
 
 (package! org-ref)
 (package! visual-fill-column)
+(package! el-patch)

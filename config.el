@@ -52,11 +52,15 @@
 
 ;; paths
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq my-org-dir (if (file-exists-p! "macc" doom-private-dir)
+(setq! my-org-dir (if (file-exists-p! "macc" doom-private-dir)
                      "~/cut/org"
                    "~/org"))
-(setq citation-dir (concat my-org-dir "/cite"))
-(setq citation-bib (concat citation-dir "/zot.bib"))
+(setq! citation-dir (concat my-org-dir "/cite"))
+(setq! citation-bib (concat citation-dir "/zot.bib"))
+
+(setq! org-directory my-org-dir)
+(setq! org-roam-directory my-org-dir)
+(setq! org-ref-notes-directory citation-dir)
 
 ;; $ touch arista
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -123,15 +127,13 @@
   (setq evil-move-cursor-back nil)
   (setq evil-cross-lines t))
 
-
 (after! org
   ;; dont create new file when capture is cancelled
   (set-popup-rules!
     '(("^CAPTURE-.*\\.org$" :autosave 'ignore)))
   (add-hook! org-mode #'visual-fill-column-mode)
 
-  (setq! org-directory my-org-dir
-         org-capture-templates
+  (setq! org-capture-templates
          '(("t" "Personal todo" entry
             (file+headline +org-capture-todo-file "Inbox")
             "* [ ] %?\n%i\n%a" :prepend t)
@@ -166,7 +168,6 @@
     :config
     (org-ref-ivy-cite-completion)
     (setq! org-ref-default-bibliography (list citation-bib)
-           org-ref-notes-directory citation-dir
            org-ref-notes-function #'orb-edit-notes-ad))
 
 (use-package! org-roam-bibtex
@@ -184,7 +185,6 @@
         :unnarrowed t))))
 
 (after! org-roam
-  (setq org-roam-directory my-org-dir)
   (setq org-roam-index-file "index.org")
   (setq +org-roam-open-buffer-on-find-file nil)
   (setq org-roam-capture-templates
@@ -209,18 +209,30 @@
            :empty-lines 1)))
 
   ;; custom org-roam capture stuff
-  (defun my/org-roam-capture--capture (&optional goto keys)
-    (let* ((org-capture-templates (mapcar #'org-roam-capture--convert-template my/org-roam-capture-templates))
+  ;; check if patch stuff worked with (symbol-function 'function-name)
+  (el-patch-defun org-roam-capture--capture (&optional goto keys (el-patch-add templates))
+    "Create a new file, and return the path to the edited file.
+The templates are defined at `org-roam-capture-templates'.  The
+GOTO and KEYS argument have the same functionality as
+`org-capture'."
+    (let* ((org-capture-templates (mapcar #'org-roam-capture--convert-template
+                                          (el-patch-swap org-roam-capture-templates
+                                                         (if (null templates)
+                                                             org-roam-capture-templates
+                                                           templates))))
            (one-template-p (= (length org-capture-templates) 1))
-           org-capture-templates-contexts
-           (org-capture-link-is-already-stored t))
+           org-capture-templates-contexts)
       (when one-template-p
         (setq keys (caar org-capture-templates)))
       (if (or one-template-p
               (eq org-roam-capture-function 'org-capture))
           (org-capture goto keys)
         (funcall-interactively org-roam-capture-function))))
-  (defun my/org-roam--get-title-path-completions-tag-filtered (tag-filter)
+
+  (el-patch-defun org-roam--get-title-path-completions ((el-patch-add &optional tag-filter))
+    "Return an alist for completion.
+The car is the displayed title for completion, and the cdr is a
+plist containing the path and title for the file."
     (let* ((rows (org-roam-db-query [:select [files:file titles:title tags:tags files:meta] :from titles
                                      :left :join tags
                                      :on (= titles:file tags:file)
@@ -233,15 +245,25 @@
                               rows))
       (dolist (row rows completions)
         (pcase-let ((`(,file-path ,title ,tags) row))
-          (let ((v (list title :path file-path :title title)))
-            (if (member tag-filter tags) (push v completions)))))))
-  (defun my/org-roam-capture--tag-filtered (tag-filter &optional goto keys)
+          (let ((k (org-roam--prepend-tag-string title tags))
+                (v (list :path file-path :title title)))
+            (el-patch-swap
+              (push (cons k v) completions)
+              (if (null tag-filter)
+                  (push (cons k v) completions)
+                (if (member tag-filter tags)
+                    (push (list title :path file-path :title title) completions)))))))))
+
+  (el-patch-defun org-roam-capture (&optional goto keys (el-patch-add templates tag-filter require-match))
+    "Launches an `org-capture' process for a new or existing note.
+This uses the templates defined at `org-roam-capture-templates'.
+Arguments GOTO and KEYS see `org-capture'."
     (interactive "P")
     (unless org-roam-mode (org-roam-mode))
-    (let* ((completions (my/org-roam--get-title-path-completions-tag-filtered tag-filter))
+    (let* ((completions (org-roam--get-title-path-completions (el-patch-add tag-filter)))
            (title-with-keys (org-roam-completion--completing-read "File: "
                                                                   completions
-                                                                  :require-match t))
+                                                                  (el-patch-add :require-match require-match)))
            (res (cdr (assoc title-with-keys completions)))
            (title (or (plist-get res :title) title-with-keys))
            (file-path (plist-get res :path)))
@@ -250,27 +272,30 @@
                                           (cons 'file file-path)))
             (org-roam-capture--context 'capture))
         (condition-case err
-            (my/org-roam-capture--capture goto keys)
+            (org-roam-capture--capture goto keys (el-patch-add templates))
           (error (user-error "%s.  Please adjust `org-roam-capture-templates'"
                              (error-message-string err)))))))
-  (defun my/org-roam-capture-existing-citation (&optional goto keys)
-    (interactive "P")
-    (my/org-roam-capture--tag-filtered "citation" goto keys))
 
-  ;; custom org-roam-dailies capture stuff
-  (defun my/org-roam-dailies--capture (time &optional goto keys)
+  (el-patch-defun org-roam-dailies--capture (time &optional goto (el-patch-add keys))
+    "Capture an entry in a daily-note for TIME, creating it if necessary.
+
+When GOTO is non-nil, go the note without creating an entry."
     (unless org-roam-mode (org-roam-mode))
     (let ((org-roam-capture-templates (--> org-roam-dailies-capture-templates
                                            (if goto (list (car it)) it)))
           (org-roam-capture--info (list (cons 'time time)))
           (org-roam-capture--context 'dailies))
-      (org-roam-capture--capture (when goto '(4)) keys)))
+      (org-roam-capture--capture (when goto '(4)) (el-patch-add keys))))
+
+  (defun my/org-roam-capture-existing-citation (&optional goto keys templates tag-filter require-match)
+    (interactive "P")
+    (org-roam-capture goto keys my/org-roam-capture-templates "citation" t))
   (defun my/org-roam-dailies-capture-today-fleet (&optional goto keys)
     (interactive "P")
-    (my/org-roam-dailies--capture (current-time) nil "x"))
+    (org-roam-dailies--capture (current-time) nil "x"))
   (defun my/org-roam-dailies-capture-today-journal (&optional goto keys)
     (interactive "P")
-    (my/org-roam-dailies--capture (current-time) nil "j")))
+    (org-roam-dailies--capture (current-time) nil "j")))
 
 (custom-set-faces!
   '(eros-result-overlay-face :background nil)
@@ -291,7 +316,6 @@
   '((org-link-invalid org-roam-link-shielded) :background nil :foreground "brightred" :weight normal)
   '(org-date :foreground "white" :background "#101010" )
   '((org-tag org-tag-group org-list-dt) :foreground "#9c91e4")
-
   )
 
 ;; keybinds
@@ -323,6 +347,25 @@
        :desc "Open scratch buffer" "x" #'doom/switch-to-project-scratch-buffer
        "X" nil))
 
+(map!
+ :map org-mode-map
+ "M-n" nil
+ (:prefix ("M-n" . "Note functions")
+  :desc "previous daily" "M-h" #'org-roam-dailies-find-previous-note
+  :desc "next daily" "M-l" #'org-roam-dailies-find-next-note
+  :desc "show backlinks" "M-n" #'org-roam
+  :desc "store link" "s" #'org-store-link
+  :desc "build cache" "b" #'org-store-link
+  (:prefix ("i" . "Insert")
+   :desc "note" "n" #'org-roam-insert
+   :desc "citation" "c" #'orb-insert
+   :desc "link" "l" #'org-insert-link
+   :desc "last stored link" "s" #'org-insert-last-stored-link
+   :desc "header" "h" #'org-insert-heading
+   :desc "header" "j" #'org-insert-subheading
+   )
+  ))
+
 ; org leader bindings
 (map! :leader
       (:prefix "n"
@@ -343,20 +386,8 @@
        :desc "Citations" "c" #'ivy-bibtex
        :desc "Find file" "f" #'+default/find-in-notes
        :desc "Browse files" "F" #'+default/browse-notes
-       :desc "Store link" "s" #'org-store-link
        :desc "Show backlinks" "b" #'org-roam
-       (:prefix ("i" . "Insert")
-        :desc "note" "n" #'org-roam-insert
-        :desc "citation" "c" #'orb-insert
-        :desc "link" "l" #'org-insert-link
-        :desc "last stored link" "s" #'org-insert-last-stored-link)
-       (:prefix ("d" . "Dailies")
-        :desc "Date" "d" #'org-roam-dailies-find-date
-        :desc "Today" "t" #'org-roam-dailies-find-today
-        :desc "Tomorrow" "m" #'org-roam-dailies-find-tomorrow
-        :desc "Yesterday" "y" #'org-roam-dailies-find-yesterday
-        :desc "Prev" "h" #'org-roam-dailies-find-previous-note
-        :desc "Next" "l" #'org-roam-dailies-find-next-note)
+       :desc "Date" "d" #'org-roam-dailies-find-date
        ))
 
 ;buffer / window management
@@ -426,15 +457,14 @@
 (map! :n "gb" #'better-jumper-jump-backward)
 (map! :n "gf" #'better-jumper-jump-forward)
 (map! :nmv "gc" #'goto-last-change)
-(map! :nm "C-n" nil
-      :nm "C-p" nil
+(map! :nmg "C-n" nil
+      :nmg "C-p" nil
       (:after org :map org-mode-map
        "C-n" #'org-next-visible-heading
        "C-p" #'org-previous-visible-heading)
       (:after magit :map magit-mode-map
        "C-n" #'magit-section-forward
        "C-p" #'magit-section-backward))
-(map! :g "C-p" #'evil-paste-after)
 
 ; text objects
 (defmacro define-and-bind-text-object (key start-regex end-regex)
