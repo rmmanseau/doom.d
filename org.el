@@ -24,25 +24,26 @@
        :desc "Today" "x" #'org-roam-dailies-find-today
        :desc "Notes" "n" #'org-roam-find-file
        :desc "Citations" "c" #'ivy-bibtex
-       :desc "Find file" "f" #'+default/find-in-notes
        :desc "Browse files" "F" #'+default/browse-notes
        :desc "Show backlinks" "b" #'org-roam
-       :desc "Date" "d" #'org-roam-dailies-find-date)
-      (:map org-mode-map
-       "M-n" nil
-       (:prefix ("M-n" . "Note functions")
-        :desc "previous daily" "M-h" #'org-roam-dailies-find-previous-note
-        :desc "next daily" "M-l" #'org-roam-dailies-find-next-note
-        :desc "show backlinks" "M-n" #'org-roam
-        :desc "store link" "s" #'org-store-link
-        :desc "build cache" "b" #'org-store-link
-        (:prefix ("i" . "Insert")
-         :desc "note" "n" #'org-roam-insert
-         :desc "citation" "c" #'orb-insert
-         :desc "link" "l" #'org-insert-link
-         :desc "last stored link" "s" #'org-insert-last-stored-link
-         :desc "header" "h" #'org-insert-heading
-         :desc "header" "j" #'org-insert-subheading))))
+       :desc "Date" "d" #'org-roam-dailies-find-date
+       :desc "Fleets" "f" (lambda () (interactive) (org-todo-list "FLEET"))))
+
+(map! :map org-mode-map
+      "M-n" nil
+      (:prefix ("M-n" . "Note functions")
+       :desc "previous daily" "M-h" #'org-roam-dailies-find-previous-note
+       :desc "next daily" "M-l" #'org-roam-dailies-find-next-note
+       :desc "show backlinks" "M-n" #'org-roam
+       :desc "store link" "s" #'org-store-link
+       :desc "build cache" "b" #'org-store-link
+       (:prefix ("i" . "Insert")
+        :desc "note" "n" #'org-roam-insert
+        :desc "citation" "c" #'orb-insert
+        :desc "link" "l" #'org-insert-link
+        :desc "last stored link" "s" #'org-insert-last-stored-link
+        :desc "header" "h" #'org-insert-heading
+        :desc "header" "j" #'org-insert-subheading)))
 
 (after! org
   (setq org-todo-keywords '((sequence "TODO(t)" "WAIT(w)" "|" "DONE(d)")
