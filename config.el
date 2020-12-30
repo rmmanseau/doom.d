@@ -106,7 +106,6 @@
   (setq evil-move-cursor-back nil)
   (setq evil-cross-lines t))
 
-
 (after! org
   ;; dont create new file when capture is cancelled
   (set-popup-rules!
@@ -133,8 +132,7 @@
   '((org-link org-roam-link org-roam-link-current ) :background nil :foreground "#8fc3ff" :weight normal)
   '((org-link-invalid org-roam-link-shielded) :background nil :foreground "brightred" :weight normal)
   '(org-date :foreground "white" :background "#101010" )
-  '((org-tag org-tag-group org-list-dt) :foreground "#9c91e4")
-  )
+  '((org-tag org-tag-group org-list-dt) :foreground "#9c91e4"))
 
 ;; keybinds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
