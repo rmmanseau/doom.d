@@ -52,15 +52,17 @@
 
 ;; paths
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq! my-org-dir (if (file-exists-p! "macc" doom-private-dir)
+(setq! my/org-dir (if (file-exists-p! "macc" doom-private-dir)
                      "~/cut/org"
                    "~/org"))
-(setq! citation-dir (concat my-org-dir "/cite"))
-(setq! citation-bib (concat citation-dir "/zot.bib"))
+(setq! my/daily-dir (concat my/org-dir "/daily"))
+(setq! my/citation-dir (concat my/org-dir "/cite"))
+(setq! my/citation-bib (concat my/citation-dir "/zot.bib"))
 
-(setq! org-directory my-org-dir)
-(setq! org-roam-directory my-org-dir)
-(setq! org-ref-notes-directory citation-dir)
+(setq! org-directory my/org-dir)
+(setq! org-roam-directory my/org-dir)
+(setq! org-ref-notes-directory my/citation-dir)
+(setq! org-agenda-files (list my/daily-dir my/citation-dir))
 
 ;; $ touch arista
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -131,7 +133,12 @@
   ;; dont create new file when capture is cancelled
   (set-popup-rules!
     '(("^CAPTURE-.*\\.org$" :autosave 'ignore)))
+
+  ;; wrap text at 100 columns in org files
   (add-hook! org-mode #'visual-fill-column-mode)
+
+  (setq org-todo-keywords '((sequence "TODO(t)" "WAIT(w)" "|" "DONE(d)")
+                            (sequence "FLEET(f)" "FLEET-C(c)" "|" "ARCHIVE(a)")))
 
   (setq! org-capture-templates
          '(("t" "Personal todo" entry
@@ -159,15 +166,15 @@
            ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file "* %U %?\n %i\n %a" :heading "Changelog" :prepend t))))
 
 (after! bibtex
-  (setq! bibtex-completion-notes-path citation-dir
-         bibtex-completion-bibliography citation-bib
+  (setq! bibtex-completion-notes-path my/citation-dir
+         bibtex-completion-bibliography my/citation-bib
          ivy-bibtex-default-action #'ivy-bibtex-edit-notes))
 
 (use-package! org-ref
     :after org
     :config
     (org-ref-ivy-cite-completion)
-    (setq! org-ref-default-bibliography (list citation-bib)
+    (setq! org-ref-default-bibliography (list my/citation-bib)
            org-ref-notes-function #'orb-edit-notes-ad))
 
 (use-package! org-roam-bibtex
@@ -180,8 +187,8 @@
      orb-templates
      '(("r" "ref" plain #'org-roam-capture--get-point
         "%?"
-        :file-name "${citekey}"
-        :head "#+TITLE: ${citekey} [ ${title}, ${author} ]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: citation\n#+CREATED: %u\n\n* INBOX\n* ARCHIVE\n"
+        :file-name "cite/${citekey}"
+        :head "#+TITLE: ${citekey} [ ${title}, ${author} ]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: citation\n#+CREATED: %u\n\n* FLEETING\n"
         :unnarrowed t))))
 
 (after! org-roam
@@ -195,17 +202,17 @@
            :unnarrowed t)))
   (setq my/org-roam-capture-templates
         '(("c" "cite" entry #'org-roam-capture--get-point
-           "** FLEET[C] : %?\n(pg. ${page-number})\n"
+           "** FLEET-C %?\n(pg. ${page-number})\n"
            :file-name "${slug}"
            :olp ("INBOX")
-           :head "\n* INBOX\n* ARCHIVE\n"
+           :head "\n* FLEETING\n"
            :empty-lines 1)))
   (setq org-roam-dailies-capture-templates
         '(("x" "fleet" entry #'org-roam-capture--get-point
-           "** FLEET : %?\n"
+           "** FLEET %?\n"
            :file-name "daily/%<%Y-%m-%d>"
-           :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* INBOX\n* ARCHIVE\n"
-           :olp ("INBOX")
+           :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* FLEETING\n"
+           :olp ("FLEETING")
            :empty-lines 1)))
 
   ;; custom org-roam capture stuff
