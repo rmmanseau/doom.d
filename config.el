@@ -175,6 +175,12 @@
           (lambda (_)
             (ivy-switch-buffer))))))
 
+(defun my/find-file-in-dir (&optional directory)
+  (interactive "D")
+    (let ((file (ivy-completing-read "Find file: "
+                                     (projectile-dir-files directory))))
+      (find-file (expand-file-name file directory))))
+
 (map! :nmvg "C-f" #'counsel-find-file
       (:map magit-mode-map :nv "C-f" nil)
       (:map counsel-find-file-map "C-f"
@@ -182,7 +188,7 @@
          (interactive)
          (ivy-exit-with-action
           (lambda (str)
-            (projectile-find-file-in-directory str)))))
+            (my/find-file-in-dir str)))))
       (:map ivy-switch-buffer-map "C-f"
        (lambda ()
          (interactive)
