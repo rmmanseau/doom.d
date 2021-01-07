@@ -7,6 +7,7 @@
        :desc "Fleet" "x" #'my/org-roam-dailies-capture-today-fleet
        :desc "Journal" "j" #'my/org-roam-dailies-capture-today-journal
        (:prefix ("c" . "Cite")
+        :desc "Cite" "c" #'my/org-roam-capture-existing-citation
         :desc "Page" "p" #'my/org-roam-capture-existing-citation-page
         :desc "Time" "t" #'my/org-roam-capture-existing-citation-time
         :desc "Memo" "m" #'my/org-roam-capture-existing-citation-memo
@@ -114,7 +115,12 @@
            :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+ROAM_TAGS:\n#+CREATED: %u\n\n- related ::\n\n"
            :unnarrowed t)))
   (setq my/org-roam-capture-templates
-        '(("t" "timestamp" entry #'org-roam-capture--get-point
+        '(("c" "citation" entry #'org-roam-capture--get-point
+           "** FLEET %?\n"
+           :file-name "${slug}"
+           :olp ("FLEETING")
+           :empty-lines 1)
+          ("t" "timestamp" entry #'org-roam-capture--get-point
            "** FLEET %?\n(ts. ${timestamp})\n"
            :file-name "${slug}"
            :olp ("FLEETING")
@@ -222,6 +228,9 @@ When GOTO is non-nil, go the note without creating an entry."
           (org-roam-capture--context 'dailies))
       (org-roam-capture--capture (when goto '(4)) (el-patch-add keys))))
 
+  (defun my/org-roam-capture-existing-citation (&optional goto keys templates tag-filter require-match)
+    (interactive "P")
+    (org-roam-capture goto "c" my/org-roam-capture-templates "citation" t))
   (defun my/org-roam-capture-existing-citation-page (&optional goto keys templates tag-filter require-match)
     (interactive "P")
     (org-roam-capture goto "p" my/org-roam-capture-templates "citation" t))
