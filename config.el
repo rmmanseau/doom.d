@@ -130,12 +130,12 @@
 
   '(org-document-title :background nil :foreground "#e2c770" :weight ultra-bold)
   '(org-default :background nil :foreground "white")
-  '((org-level-1 org-level-2 org-level-3 org-level-4 org-level-5 org-level-6 org-level-7 org-level-8)
+  '((org-list-dt org-level-1 org-level-2 org-level-3 org-level-4 org-level-5 org-level-6 org-level-7 org-level-8)
     :background nil :foreground "brightwhite" :weight bold )
   '((org-link org-roam-link org-roam-link-current ) :background nil :foreground "#8fc3ff" :weight normal)
   '((org-link-invalid org-roam-link-shielded) :background nil :foreground "brightred" :weight normal)
   '(org-date :foreground "white" :background "#101010" )
-  '((org-tag org-tag-group org-list-dt) :foreground "#9c91e4"))
+  '((org-tag org-tag-group) :foreground "#9c91e4"))
 
 ;; keybinds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

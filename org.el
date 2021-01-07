@@ -5,7 +5,12 @@
       "x" nil
       (:prefix ("x" . "Capture")
        :desc "Fleet" "x" #'my/org-roam-dailies-capture-today-fleet
-       :desc "Citation Fleet" "c" #'my/org-roam-capture-existing-citation
+       :desc "Journal" "j" #'my/org-roam-dailies-capture-today-journal
+       (:prefix ("c" . "Cite")
+        :desc "Page" "p" #'my/org-roam-capture-existing-citation-page
+        :desc "Time" "t" #'my/org-roam-capture-existing-citation-time
+        :desc "Memo" "m" #'my/org-roam-capture-existing-citation-memo
+        )
        :desc "Note" "n" #'org-roam-capture
        :desc "Bib Note" "b" #'ivy-bibtex)
       (:prefix "n"
@@ -96,7 +101,7 @@
      '(("r" "ref" plain #'org-roam-capture--get-point
         "%?"
         :file-name "cite/${citekey}"
-        :head "#+TITLE: ${citekey} [ ${title}, ${author} ]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: citation\n#+CREATED: %u\n\n* FLEETING\n"
+        :head "#+TITLE: ${citekey} [ ${title}, ${author} ]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: citation\n#+CREATED: %u\n\n* FLEETING\n* MEMO\n"
         :unnarrowed t))))
 
 (after! org-roam
@@ -109,18 +114,33 @@
            :head "#+TITLE: ${title}\n#+ROAM_ALIAS:\n#+ROAM_TAGS:\n#+CREATED: %u\n\n- related ::\n\n"
            :unnarrowed t)))
   (setq my/org-roam-capture-templates
-        '(("c" "cite" entry #'org-roam-capture--get-point
-           "** FLEET %?\n(pg. ${page-number})\n"
+        '(("t" "timestamp" entry #'org-roam-capture--get-point
+           "** FLEET %?\n(ts. ${timestamp})\n"
            :file-name "${slug}"
-           :olp ("INBOX")
-           :head "\n* FLEETING\n"
+           :olp ("FLEETING")
+           :empty-lines 1)
+          ("p" "page" entry #'org-roam-capture--get-point
+           "** FLEET %?\n(pg. ${pagenumber})\n"
+           :file-name "${slug}"
+           :olp ("FLEETING")
+           :empty-lines 1)
+          ("m" "memo" item #'org-roam-capture--get-point
+           "+ %?\n"
+           :file-name "${slug}"
+           :olp ("MEMO")
            :empty-lines 1)))
   (setq org-roam-dailies-capture-templates
         '(("x" "fleet" entry #'org-roam-capture--get-point
            "** FLEET %?\n"
            :file-name "daily/%<%Y-%m-%d>"
-           :head "#+TITLE: %<%Y-%m-%d %a>\n#+ROAM_TAGS: daily\n\n* JOURNAL\n\n\n* FLEETING\n"
+           :head "#+TITLE: %<%Y-%m-%d %a>\n#+CREATED: %u\n#+ROAM_TAGS: daily\n\n* FLEETING\n\n\n* JOURNAL\n"
            :olp ("FLEETING")
+           :empty-lines 1)
+          ("j" "journal" item #'org-roam-capture--get-point
+           "+ %?\n"
+           :file-name "daily/%<%Y-%m-%d>"
+           :head "#+TITLE: %<%Y-%m-%d %a>\n#+CREATED: %u\n#+ROAM_TAGS: daily\n\n* FLEETING\n\n\n* JOURNAL\n"
+           :olp ("JOURNAL")
            :empty-lines 1)))
 
   ;; custom org-roam capture stuff
@@ -202,9 +222,15 @@ When GOTO is non-nil, go the note without creating an entry."
           (org-roam-capture--context 'dailies))
       (org-roam-capture--capture (when goto '(4)) (el-patch-add keys))))
 
-  (defun my/org-roam-capture-existing-citation (&optional goto keys templates tag-filter require-match)
+  (defun my/org-roam-capture-existing-citation-page (&optional goto keys templates tag-filter require-match)
     (interactive "P")
-    (org-roam-capture goto keys my/org-roam-capture-templates "citation" t))
+    (org-roam-capture goto "p" my/org-roam-capture-templates "citation" t))
+  (defun my/org-roam-capture-existing-citation-time (&optional goto keys templates tag-filter require-match)
+    (interactive "P")
+    (org-roam-capture goto "t" my/org-roam-capture-templates "citation" t))
+  (defun my/org-roam-capture-existing-citation-memo (&optional goto keys templates tag-filter require-match)
+    (interactive "P")
+    (org-roam-capture goto "m" my/org-roam-capture-templates "citation" t))
   (defun my/org-roam-dailies-capture-today-fleet (&optional goto keys)
     (interactive "P")
     (org-roam-dailies--capture (current-time) nil "x"))
