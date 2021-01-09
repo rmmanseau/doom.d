@@ -41,9 +41,10 @@
        :desc "previous daily" "M-h" #'org-roam-dailies-find-previous-note
        :desc "next daily" "M-l" #'org-roam-dailies-find-next-note
        :desc "show backlinks" "M-n" #'org-roam
-       :desc "store link" "s" #'org-store-link
-       :desc "build cache" "b" #'org-store-link
-       (:prefix ("i" . "Insert")
+       :desc "store link" "M-s" #'org-store-link
+       :desc "build cache" "M-b" #'org-roam-db-build-cache
+       :desc "created property" "M-c" #'my/org-set-created-property
+       (:prefix ("M-i" . "Insert")
         :desc "note" "n" #'org-roam-insert
         :desc "citation" "c" #'orb-insert
         :desc "link" "l" #'org-insert-link
@@ -51,7 +52,29 @@
         :desc "header" "h" #'org-insert-heading
         :desc "header" "j" #'org-insert-subheading)))
 
+(defvar my/org-created-property-name "CREATED"
+  "The name of the org-mode property that stores the creation date of the entry")
+
+(defun my/org-set-created-property (&optional active NAME)
+  "Set a property on the entry giving the creation time.
+
+By default the property is called CREATED. If given the `NAME'
+argument will be used instead. If the property already exists, it
+will not be modified."
+  (interactive)
+  (let* ((created (or NAME my/org-created-property-name))
+         (fmt (if active "<%s>" "[%s]"))
+         (now  (format fmt (format-time-string "%Y-%m-%d %a %H:%M"))))
+    (unless (org-entry-get (point) created nil)
+      (org-set-property created now))))
+
 (after! org
+  (add-hook! 'org-capture-before-finalize-hook #'my/org-set-created-property)
+  ;; (setq! org-agenda-sorting-strategy `((agenda timestamp-down habit-down priority-down category-keep)
+  ;;                                      (todo priority-down category-keep)
+  ;;                                      (tags priority-down category-keep)
+  ;;                                      (search category-keep)))
+  ;; (setq! org-agenda-sorting-strategy-selected '(timestamp-down))
   (setq org-todo-keywords '((sequence "TODO(t)" "WAIT(w)" "|" "DONE(d)")
                             (sequence "FLEET(f)" "|" "ARCHIVE(a)")))
   (setq! org-capture-templates
@@ -102,7 +125,7 @@
      '(("r" "ref" plain #'org-roam-capture--get-point
         "%?"
         :file-name "cite/${citekey}"
-        :head "#+TITLE: ${citekey} [ ${title}, ${author} ]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: citation\n#+CREATED: %u\n\n* FLEETING\n* MEMO\n"
+        :head "#+TITLE: ${citekey} [ ${title}, ${author} ]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: citation\n#+CREATED: %u\n\n* FLEETING\n\n\n* MEMO\n"
         :unnarrowed t))))
 
 (after! org-roam
@@ -121,12 +144,12 @@
            :olp ("FLEETING")
            :empty-lines 1)
           ("t" "timestamp" entry #'org-roam-capture--get-point
-           "** FLEET %?\n(ts. ${timestamp})\n"
+           "** FLEET (ts. ${time-stamp}) %?\n"
            :file-name "${slug}"
            :olp ("FLEETING")
            :empty-lines 1)
           ("p" "page" entry #'org-roam-capture--get-point
-           "** FLEET %?\n(pg. ${pagenumber})\n"
+           "** FLEET (pg. ${page-number}) %?\n"
            :file-name "${slug}"
            :olp ("FLEETING")
            :empty-lines 1)

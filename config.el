@@ -88,6 +88,9 @@
 ;; escape hook
 (setq doom-escape-hook (remove 'yas-abort-snippet doom-escape-hook))
 
+;; when yassnippet starts hijacking org roam dailies, try this
+;; (set-file-template! 'org-mode :ignore t)
+
 ;; popup stuff
 (plist-put +popup-defaults :modeline t)
 
@@ -112,7 +115,7 @@
 (after! org
   ;; dont create new file when capture is cancelled
   (set-popup-rules!
-    '(("^CAPTURE-.*\\.org$" :autosave 'ignore)))
+    '(("^CAPTURE-.*\\.org$" :autosave 'ignore :size 0.4)))
 
   ;; wrap text at 100 columns in org files
   (add-hook! org-mode #'visual-fill-column-mode))
