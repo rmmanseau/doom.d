@@ -9,6 +9,7 @@
        "b" #'a4-bug
        "s" #'a4-gid2
        "d" #'a4-gid2-defs
+       "g" #'a-grok
        ))
 (add-to-list 'tramp-methods
              '("a4ssh"

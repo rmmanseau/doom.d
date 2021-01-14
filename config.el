@@ -166,7 +166,7 @@
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
 
 (map! :nmiv "C-o" #'evil-window-next
-      (:map compilation-mode-map "C-o" nil)
+      (:map (compilation-mode-map compilation-minor-mode-map) "C-o" nil)
       (:after help :map help-mode-map :nm "C-o" nil))
 
 (map! :nmvg "C-b" #'ivy-switch-buffer
@@ -220,7 +220,10 @@
        :nmiv "C-j" nil)
       (:after magit :map magit-mode-map
        :nm "C-k" nil
-       :nm "C-j" nil))
+       :nm "C-j" nil)
+      (:map grep-mode-map
+       :n "C-k" nil
+       :n "C-j" nil))
 (map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2)))
       (:after rjsx-mode :map rjsx-mode-map :nm "C-d" nil)
       (:after magit :map magit-mode-map :nm "C-d" nil))
@@ -242,7 +245,10 @@
        "C-p" #'org-previous-visible-heading)
       (:after magit :map magit-mode-map
        "C-n" #'magit-section-forward
-       "C-p" #'magit-section-backward))
+       "C-p" #'magit-section-backward)
+      (:map grep-mode-map
+       :n "C-n" #'next-error-no-select
+       :n "C-p" #'previous-error-no-select ))
 
 ; text objects
 (defmacro define-and-bind-text-object (key start-regex end-regex)
