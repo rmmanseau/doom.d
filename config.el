@@ -227,13 +227,21 @@
        :nm "C-j" nil)
       (:map grep-mode-map
        :n "C-k" nil
-       :n "C-j" nil))
+       :n "C-j" nil)
+      (:map comint-mode-map
+       :n "C-j" nil
+       :n "C-k" nil)
+      (:after sql :map sql-interactive-mode-map
+       "C-j" nil))
 (map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2)))
       (:after rjsx-mode :map rjsx-mode-map :nm "C-d" nil)
-      (:after magit :map magit-mode-map :nm "C-d" nil))
+      (:after magit :map magit-mode-map :nm "C-d" nil)
+      (:map comint-mode-map :ng "C-d" nil))
 (map! :nm "C-u" (lambda () (interactive) (evil-scroll-line-down (/ (window-height) 2))))
 (map! :nmv "J" (kbd "3j"))
-(map! :nmv "K" (kbd "3k"))
+(map! :nmv "K" (kbd "3k")
+      (:after magit :map magit-mode-map
+       "K" nil))
 (map! :nmv "L" #'evil-forward-WORD-end)
 (map! :nmv "H" #'evil-backward-WORD-begin)
 (map! :mnv "ga" #'evil-avy-goto-char-2)
