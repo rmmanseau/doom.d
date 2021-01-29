@@ -231,6 +231,9 @@
       (:map comint-mode-map
        :n "C-j" nil
        :n "C-k" nil)
+      (:map (compilation-mode-map compilation-minor-mode-map)
+       :n "C-j" nil
+       :n "C-k" nil )
       (:after sql :map sql-interactive-mode-map
        "C-j" nil))
 (map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2)))
@@ -260,7 +263,11 @@
        "C-p" #'magit-section-backward)
       (:map grep-mode-map
        :n "C-n" #'next-error-no-select
-       :n "C-p" #'previous-error-no-select ))
+       :n "C-p" #'previous-error-no-select )
+      (:map (compilation-mode-map compilation-minor-mode-map)
+       :n "C-n" #'compilation-next-error
+       :n "C-p" #'compilation-previous-error )
+     )
 
 ; text objects
 (defmacro define-and-bind-text-object (key start-regex end-regex)
