@@ -62,6 +62,7 @@
 (setq! my/citation-dir (concat my/org-dir "cite/"))
 (setq! my/citation-bib (concat my/citation-dir "zot.bib"))
 
+(setq! org-roam-v2-ack t)
 (setq! org-directory my/org-dir)
 (setq! org-roam-directory my/org-dir)
 (setq! org-ref-notes-directory my/citation-dir)
