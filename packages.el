@@ -60,3 +60,8 @@
 (package! org-ref)
 (package! visual-fill-column)
 (package! el-patch)
+
+(package! jenkinsfile-mode :recipe
+  (:host github
+   :repo "john2x/jenkinsfile-mode"
+   :branch "master"))
