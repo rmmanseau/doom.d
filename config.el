@@ -75,8 +75,13 @@
 (when (file-exists-p! "arista" my/toggle-dir)
   (load! "arista.el" doom-private-dir))
 
-(when (file-exists-p! "org" my/toggle-dir)
-  (load! "org.el" doom-private-dir))
+;; packages
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package! caddyfile-mode
+  :mode (("Caddyfile\\'" . caddyfile-mode)
+         ("caddy\\.conf\\'" . caddyfile-mode)))
+
 
 ;; look / feel
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -322,3 +327,9 @@
       (:map ivy-minibuffer-map
        "C-p" #'evil-paste-after
        "C-w" #'+ivy/woccur))
+
+;; misc / fixes
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(after! counsel
+  (setq counsel-rg-base-command "rg -M 240 --with-filename --no-heading --line-number --color never %s || true"))

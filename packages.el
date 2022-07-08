@@ -51,15 +51,10 @@
 
 (package! evil-snipe :disable t)
 
-;; orb
-(package! org-roam-bibtex
-  :recipe (:host github :repo "org-roam/org-roam-bibtex"))
-(unpin! org-roam company-org-roam)
-(unpin! bibtex-completion helm-bibtex ivy-bibtex)
-
-(package! org-ref)
 (package! visual-fill-column)
 (package! el-patch)
+
+(package! caddyfile-mode)
 
 (package! jenkinsfile-mode :recipe
   (:host github
