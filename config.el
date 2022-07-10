@@ -53,8 +53,11 @@
 ;; paths
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(setq! my/toggle-dir (concat doom-private-dir "toggle/"))
+(setq! my/doom-private-dir (expand-file-name doom-private-dir))
+(setq! my/toggle-dir (concat my/doom-private-dir "toggle/"))
+(setq! my/json-schema-dir (concat my/doom-private-dir "json-schemas/"))
 
+;; prob deprecate all of this lol
 (setq! my/org-dir (if (file-exists-p! "cut" my/toggle-dir)
                      "~/cut/org/"
                    "~/org/"))
@@ -82,6 +85,13 @@
   :mode (("Caddyfile\\'" . caddyfile-mode)
          ("caddy\\.conf\\'" . caddyfile-mode)))
 
+
+;; lsp customization
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq lsp-json-schemas
+      `[(:fileMatch ["caddy.json"]
+         :url ,(concat my/json-schema-dir "caddy_schema.json"))])
 
 ;; look / feel
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
