@@ -93,6 +93,8 @@
       `[(:fileMatch ["caddy.json"]
          :url ,(concat my/json-schema-dir "caddy_schema.json"))])
 
+(setq ivy-xref-use-file-path t)
+
 ;; look / feel
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
