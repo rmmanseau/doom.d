@@ -89,11 +89,23 @@
 ;; lsp customization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; javascript LSP notes:
+;;
+;; xref will only show references in loaded buffers unless you add the
+;; following file to the root of the javascript project. be sure to
+;; exclude the node modules directory
+;;
+;; jsconfig.json
+;;
+;; {
+;;   "exclude": ["node_modules"]
+;; }
+
+
 (setq lsp-json-schemas
       `[(:fileMatch ["caddy.json"]
          :url ,(concat my/json-schema-dir "caddy_schema.json"))])
 
-(setq ivy-xref-use-file-path t)
 
 ;; look / feel
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -124,7 +136,8 @@
   (setq swiper-action-recenter nil))
 
 (after! ivy
-  (setq ivy-use-virtual-buffers t))
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-xref-use-file-path t))
 
 (after! evil
   (setq evil-move-cursor-back nil)
@@ -209,6 +222,7 @@
           (lambda (_)
             (ivy-switch-buffer))))))
 
+(autoload 'projectile-dir-files "projectile")
 (defun my/find-file-in-dir (&optional directory)
   (interactive "D")
     (let ((file (ivy-completing-read "Find file: "
