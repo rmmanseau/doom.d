@@ -182,7 +182,7 @@
       (:after help :map help-mode-map :nm "C-o" nil))
 
 (map! :nmvg "C-b" #'ivy-switch-buffer
-      (:map magit-mode-map :nv "C-b" nil)
+      (:map magit-mode-map :nv "C-b" #'magit-display-repository-buffer)
       (:map counsel-find-file-map "C-b"
        (lambda ()
          (interactive)
@@ -259,10 +259,11 @@
       (:after magit :map magit-mode-map :nm "C-d" nil)
       (:map comint-mode-map :ng "C-d" nil))
 (map! :nm "C-u" (lambda () (interactive) (evil-scroll-line-down (/ (window-height) 2))))
-(map! :nmv "J" (kbd "3j"))
-(map! :nmv "K" (kbd "3k")
+(map! :nmv "J" (kbd "3j")
+      :nmv "K" (kbd "3k")
       (:after magit :map magit-mode-map
-       "K" nil))
+       "K" nil
+       "J" nil))
 (map! :nmv "L" #'evil-forward-WORD-end)
 (map! :nmv "H" #'evil-backward-WORD-begin)
 (map! :mnv "ga" #'evil-avy-goto-char-2)
