@@ -50,7 +50,7 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-;; paths
+;; my variables
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (setq! my/doom-private-dir (expand-file-name doom-private-dir))
@@ -64,52 +64,10 @@
 (when (file-exists-p! "arista" my/toggle-dir)
   (load! "arista.el" doom-private-dir))
 
-;; packages
+;; behavior
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(use-package! caddyfile-mode
-  :mode (("Caddyfile\\'" . caddyfile-mode)
-         ("caddy\\.conf\\'" . caddyfile-mode)))
-
-
-;; lsp customization
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; javascript LSP notes:
-;;
-;; xref will only show references in loaded buffers unless you add the
-;; following file to the root of the javascript project. be sure to
-;; exclude the node modules directory
-;;
-;; jsconfig.json
-;;
-;; {
-;;   "exclude": ["node_modules"]
-;; }
-
-
-(setq lsp-json-schemas
-      `[(:fileMatch ["caddy.json"]
-         :url ,(concat my/json-schema-dir "caddy_schema.json"))])
-
-
-;; look / feel
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; (setq doom-theme 'doom-molokai) ;; magit diffs currently unreadable
-(setq doom-theme 'doom-monokai-classic)
-(setq display-line-numbers-type nil)
 (setq confirm-kill-emacs nil)
-
-;; escape hook
-
-;; popup stuff
-(plist-put +popup-defaults :modeline t)
-
-;; activate mouse-based scrolling
-(unless (display-graphic-p)
-  (map! "<mouse-4>" #'evil-scroll-line-up
-        "<mouse-5>" #'evil-scroll-line-down))
 
 (after! avy
   (setq avy-all-windows t))
@@ -128,6 +86,54 @@
 (after! yasnippet
   (setq doom-escape-hook (remove 'yas-abort-snippet doom-escape-hook)))
 
+(after! counsel
+  (setq counsel-rg-base-command "rg -M 240 --with-filename --no-heading --line-number --color never %s || true"))
+
+(use-package! caddyfile-mode
+  :mode (("Caddyfile\\'" . caddyfile-mode)
+         ("caddy\\.conf\\'" . caddyfile-mode)))
+
+(defun setup-web-indent (n)
+  ;; web development
+  (setq javascript-indent-level n) ; javascript-mode
+  (setq js-indent-level n) ; js-mode
+  (setq js2-basic-offset n) ; js2-mode, alias of js-indent-level
+  (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
+  (setq web-mode-css-indent-offset n) ; web-mode, css in html file
+  (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
+  (setq css-indent-offset n) ; css-mode
+  )
+(setup-web-indent 2)
+(add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
+
+;; lsp customization
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; javascript LSP notes:
+;;
+;; xref will only show references in loaded buffers unless you add the
+;; following file to the root of the javascript project. be sure to
+;; exclude the node modules directory
+;;
+;; jsconfig.json
+;;
+;; {
+;;   "exclude": ["node_modules"]
+;; }
+
+(setq lsp-json-schemas
+      `[(:fileMatch ["caddy.json"]
+         :url ,(concat my/json-schema-dir "caddy_schema.json"))])
+
+;; appearance
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (setq doom-theme 'doom-molokai) ;; magit diffs currently unreadable
+(setq doom-theme 'doom-monokai-classic)
+(setq display-line-numbers-type nil)
+
+;; popup stuff
+(plist-put +popup-defaults :modeline t)
 
 (custom-set-faces!
   '(eros-result-overlay-face :background nil)
@@ -141,21 +147,13 @@
   '(show-paren-match :background "brightblack" :foreground nil)
   )
 
-  (defun setup-web-indent (n)
-    ;; web development
-    (setq javascript-indent-level n) ; javascript-mode
-    (setq js-indent-level n) ; js-mode
-    (setq js2-basic-offset n) ; js2-mode, alias of js-indent-level
-    (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
-    (setq web-mode-css-indent-offset n) ; web-mode, css in html file
-    (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
-    (setq css-indent-offset n) ; css-mode
-    )
-  (setup-web-indent 2)
-  (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
-
 ;; keybinds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; activate mouse-based scrolling
+(unless (display-graphic-p)
+  (map! "<mouse-4>" #'evil-scroll-line-up
+        "<mouse-5>" #'evil-scroll-line-down))
 
 ; leader keys
 (map! :leader
@@ -328,9 +326,3 @@
       (:map ivy-minibuffer-map
        "C-p" #'evil-paste-after
        "C-w" #'+ivy/woccur))
-
-;; misc / fixes
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(after! counsel
-  (setq counsel-rg-base-command "rg -M 240 --with-filename --no-heading --line-number --color never %s || true"))
