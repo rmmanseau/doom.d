@@ -143,6 +143,9 @@
   (setq evil-move-cursor-back nil)
   (setq evil-cross-lines t))
 
+(after! yasnippet
+  (setq doom-escape-hook (remove 'yas-abort-snippet doom-escape-hook)))
+
 (after! org
   ;; dont create new file when capture is cancelled
   (set-popup-rules!
