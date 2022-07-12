@@ -225,12 +225,14 @@
           (lambda (_)
             (ivy-switch-buffer))))))
 
-(autoload 'projectile-dir-files "projectile")
+
 (defun my/find-file-in-dir (&optional directory)
   (interactive "D")
     (let ((file (ivy-completing-read "Find file: "
                                      (projectile-dir-files directory))))
       (find-file (expand-file-name file directory))))
+;; ensure that calling projectile-dir-files exists when above function is called
+(autoload 'projectile-dir-files "projectile")
 
 (map! :nmvg "C-f" #'counsel-find-file
       (:map magit-mode-map :nv "C-f" nil)
