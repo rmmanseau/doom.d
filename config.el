@@ -182,7 +182,8 @@
       (:after help :map help-mode-map :nm "C-o" nil))
 
 (map! :nmvg "C-b" #'ivy-switch-buffer
-      (:map magit-mode-map :nv "C-b" #'magit-display-repository-buffer)
+      (:after magit :map magit-mode-map
+       :nv "C-b" #'magit-display-repository-buffer)
       (:map counsel-find-file-map "C-b"
        (lambda ()
          (interactive)
