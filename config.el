@@ -279,6 +279,9 @@
       (:map (compilation-mode-map compilation-minor-mode-map)
        :n "C-j" nil
        :n "C-k" nil )
+      (:map transient-map
+       "C-j" #'transient-scroll-down
+       "C-k" #'transient-scroll-up)
       (:after sql :map sql-interactive-mode-map
        "C-j" nil))
 (map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2)))
