@@ -96,7 +96,7 @@
 ;; look / feel
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (setq doom-theme 'doom-molokai)
+;; (setq doom-theme 'doom-molokai) ;; magit diffs currently unreadable
 (setq doom-theme 'doom-monokai-classic)
 (setq display-line-numbers-type nil)
 (setq confirm-kill-emacs nil)
