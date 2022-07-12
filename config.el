@@ -110,13 +110,13 @@
 ;; look / feel
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(setq doom-theme 'doom-molokai)
+;; (setq doom-theme 'doom-molokai)
+(setq doom-theme 'doom-monokai-classic)
 (setq display-line-numbers-type nil)
 (setq confirm-kill-emacs nil)
 (setq! visual-fill-column-width 100)
 
 ;; escape hook
-(setq doom-escape-hook (remove 'yas-abort-snippet doom-escape-hook))
 
 ;; when yassnippet starts hijacking org roam dailies, try this
 ;; (set-file-template! 'org-mode :ignore t)
