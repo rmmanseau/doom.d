@@ -181,33 +181,53 @@
       (:map (compilation-mode-map compilation-minor-mode-map) "C-o" nil)
       (:after help :map help-mode-map :nm "C-o" nil))
 
-(map! :nmvg "C-b" #'ivy-switch-buffer
+; switch buffer
+(defun my/ivy-switch-buffer-magit ()
+  "Switch to another buffer."
+  (interactive)
+  (ivy-read "Switch to buffer: " #'internal-complete-buffer
+            :initial-input "magit "
+            :keymap ivy-switch-buffer-map
+            :preselect (buffer-name (other-buffer (current-buffer)))
+            :action #'ivy--switch-buffer-action
+            :matcher #'ivy--switch-buffer-matcher
+            :caller #'ivy-switch-buffer))
+
+(map! :nmvg "C-b" #'+ivy/switch-buffer
+      (:map ivy-switch-buffer-map "C-b" #'ignore)
       (:after magit :map magit-mode-map
-       :nv "C-b" #'magit-display-repository-buffer)
-      (:map counsel-find-file-map "C-b"
+       :nv "C-b" #'my/ivy-switch-buffer-magit)
+      (:map (counsel-find-file-map ivy-minibuffer-map) "C-b"
        (lambda ()
          (interactive)
          (ivy-exit-with-action
           (lambda (_)
-            (ivy-switch-buffer))))))
+            (+ivy/switch-buffer))))))
 
-
-(defun my/find-file-in-dir (&optional directory)
+; find file
+(setq! my/find-file-recursive-prompt "Find file (recursive): ")
+(defun my/find-file-recursive (&optional directory)
   (interactive "D")
-    (let ((file (ivy-completing-read "Find file: "
-                                     (projectile-dir-files directory))))
+    (let ((file (ivy-completing-read my/find-file-recursive-prompt
+                                     (projectile-dir-files-native directory))))
       (find-file (expand-file-name file directory))))
 ;; ensure that calling projectile-dir-files exists when above function is called
-(autoload 'projectile-dir-files "projectile")
+(autoload #'projectile-dir-files-native "projectile")
 
 (map! :nmvg "C-f" #'counsel-find-file
       (:map magit-mode-map :nv "C-f" nil)
+      (:map ivy-minibuffer-map "C-f"
+       (lambda ()
+         (interactive)
+         (ivy-exit-with-action
+          (lambda (str)
+            (counsel-find-file)))))
       (:map counsel-find-file-map "C-f"
        (lambda ()
          (interactive)
          (ivy-exit-with-action
           (lambda (str)
-            (my/find-file-in-dir str)))))
+            (my/find-file-recursive str)))))
       (:map ivy-switch-buffer-map "C-f"
        (lambda ()
          (interactive)
