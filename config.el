@@ -57,20 +57,6 @@
 (setq! my/toggle-dir (concat my/doom-private-dir "toggle/"))
 (setq! my/json-schema-dir (concat my/doom-private-dir "json-schemas/"))
 
-;; prob deprecate all of this lol
-(setq! my/org-dir (if (file-exists-p! "cut" my/toggle-dir)
-                     "~/cut/org/"
-                   "~/org/"))
-(setq! my/daily-dir (concat my/org-dir "daily/"))
-(setq! my/citation-dir (concat my/org-dir "cite/"))
-(setq! my/citation-bib (concat my/citation-dir "zot.bib"))
-
-(setq! org-roam-v2-ack t)
-(setq! org-directory my/org-dir)
-(setq! org-roam-directory my/org-dir)
-(setq! org-ref-notes-directory my/citation-dir)
-(setq! org-agenda-files (list my/daily-dir my/citation-dir))
-
 ;; to enable toggles:
 ;; $ touch ~/.doom.d/toggle/<toggle-name>
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -114,12 +100,8 @@
 (setq doom-theme 'doom-monokai-classic)
 (setq display-line-numbers-type nil)
 (setq confirm-kill-emacs nil)
-(setq! visual-fill-column-width 100)
 
 ;; escape hook
-
-;; when yassnippet starts hijacking org roam dailies, try this
-;; (set-file-template! 'org-mode :ignore t)
 
 ;; popup stuff
 (plist-put +popup-defaults :modeline t)
@@ -146,13 +128,6 @@
 (after! yasnippet
   (setq doom-escape-hook (remove 'yas-abort-snippet doom-escape-hook)))
 
-(after! org
-  ;; dont create new file when capture is cancelled
-  (set-popup-rules!
-    '(("^CAPTURE-.*\\.org$" :autosave 'ignore :size 0.4)))
-
-  ;; wrap text at 100 columns in org files
-  (add-hook! org-mode #'visual-fill-column-mode))
 
 (custom-set-faces!
   '(eros-result-overlay-face :background nil)
@@ -164,15 +139,7 @@
   '(avy-lead-face-1 :background "red" :foreground "white")
   '(avy-lead-face-2 :background "red" :foreground "white")
   '(show-paren-match :background "brightblack" :foreground nil)
-
-  '(org-document-title :background nil :foreground "#e2c770" :weight ultra-bold)
-  '(org-default :background nil :foreground "white")
-  '((org-list-dt org-level-1 org-level-2 org-level-3 org-level-4 org-level-5 org-level-6 org-level-7 org-level-8)
-    :background nil :foreground "brightwhite" :weight bold )
-  '((org-link org-roam-link org-roam-link-current ) :background nil :foreground "#8fc3ff" :weight normal)
-  '((org-link-invalid org-roam-link-shielded) :background nil :foreground "brightred" :weight normal)
-  '(org-date :foreground "white" :background "#101010" )
-  '((org-tag org-tag-group) :foreground "#9c91e4"))
+  )
 
   (defun setup-web-indent (n)
     ;; web development

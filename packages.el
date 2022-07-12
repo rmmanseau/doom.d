@@ -51,11 +51,9 @@
 
 (package! evil-snipe :disable t)
 
-(package! visual-fill-column)
 (package! el-patch)
 
 (package! caddyfile-mode)
-
 (package! jenkinsfile-mode :recipe
   (:host github
    :repo "john2x/jenkinsfile-mode"
