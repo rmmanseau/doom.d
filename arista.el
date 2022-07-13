@@ -2,14 +2,31 @@
 
 (use-package! gerrit
   :custom
-  (gerrit-host "gerrit.corp.arista.io")  ;; is needed for REST API calls
-  :config
-  ;; (progn
-    ;; (add-hook 'magit-status-sections-hook #'gerrit-magit-insert-status t)
-    ;; (global-set-key (kbd "C-x i") 'gerrit-upload-transient)
-    ;; (global-set-key (kbd "C-x o") 'gerrit-download))
-  )
+  (gerrit-host "gerrit.corp.arista.io")) ;; is needed for REST API calls
 
+;; magit / evil keybindings are kinda complicated. see:
+;; SPC h p evil-collection
+;; ~/.emacs.d/.local/straight/repos/evil-collection/modes/magit/
+;; https://github.com/emacs-evil/evil-collection/tree/master/modes/magit
+;;
+;; to rebind keys in magit mode maps that conflict with vim motion,
+;; be sure to include :n in front of the binding, ie
+;; (map! :n "G" #'gerrit-dashboard)
+(map! (:after (magit gerrit)
+       :map magit-status-mode-map
+       :n "G" #'gerrit-dashboard
+       :n "D" #'gerrit-download-transient
+       :n "P" #'gerrit-upload-transient))
+
+;; figure out mappings for gerrit upload / download transient states
+;; maybe append them to the magit transients for push and pull?
+;; look into #'transient-insert-suffix
+;;
+;; ~/.emacs.d/modules/tools/magit/config.el
+;; (transient-append-suffix 'magit-fetch "-p"
+;;   '("-t" "Fetch all tags" ("-t" "--tags")))
+
+;; user server related stuff
 (when (locate-library "Arastra")
   (load-library "Arastra")
   (map! :leader

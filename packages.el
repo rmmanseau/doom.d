@@ -52,7 +52,7 @@
 (package! evil-snipe :disable t)
 
 (package! el-patch)
-(package! gerrit)
+(package! gerrit) ;; https://github.com/thisch/gerrit.el
 
 (package! caddyfile-mode)
 (package! jenkinsfile-mode :recipe
