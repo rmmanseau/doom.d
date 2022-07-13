@@ -93,6 +93,11 @@
   :mode (("Caddyfile\\'" . caddyfile-mode)
          ("caddy\\.conf\\'" . caddyfile-mode)))
 
+;; TODO: magit blame window???
+;; https://github.com/redguardtoo/vc-msg
+;; https://www.reddit.com/r/emacs/comments/e93p51/better_git_blame_messages/
+
+
 (defun setup-web-indent (n)
   ;; web development
   (setq javascript-indent-level n) ; javascript-mode
