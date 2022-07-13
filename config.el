@@ -128,8 +128,7 @@
 ;; appearance
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (setq doom-theme 'doom-molokai) ;; magit diffs currently unreadable
-(setq doom-theme 'doom-monokai-classic)
+(setq doom-theme 'doom-molokai)
 (setq display-line-numbers-type nil)
 
 ;; popup stuff
