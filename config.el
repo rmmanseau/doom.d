@@ -176,6 +176,9 @@
 
 ;buffer / window management
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
+(map! :after counsel :map counsel-find-file-map
+      "C-h" #'counsel-up-directory
+      "C-l" #'counsel-down-directory)
 
 (map! :nmiv "C-o" #'evil-window-next
       (:map (compilation-mode-map compilation-minor-mode-map) "C-o" nil)
