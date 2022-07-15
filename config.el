@@ -164,6 +164,8 @@
       :desc "M-x" ";" #'counsel-M-x
       :desc "Eval expression" ":" #'pp-eval-expression
       :desc "Search dir" "?" #'+default/search-other-cwd
+      :desc "Maximize window" "z" #'doom/window-maximize-buffer
+      :desc "Undo window changes" "Z" #'winner-undo
       (:prefix "w" ; window
        "-" #'evil-window-split
        "\\" #'evil-window-vsplit
