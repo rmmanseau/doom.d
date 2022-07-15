@@ -189,21 +189,24 @@
       (:after help :map help-mode-map :nm "C-o" nil))
 
 ; switch buffer
-(defun my/ivy-switch-buffer-magit ()
+(defun my/ivy-switch-buffer-inital-input (input)
   "Switch to another buffer."
   (interactive)
   (ivy-read "Switch to buffer: " #'internal-complete-buffer
-            :initial-input "magit "
+            :initial-input input
             :keymap ivy-switch-buffer-map
             :preselect (buffer-name (other-buffer (current-buffer)))
             :action #'ivy--switch-buffer-action
             :matcher #'ivy--switch-buffer-matcher
             :caller #'ivy-switch-buffer))
+(defun my/ivy-switch-buffer-git ()
+  (interactive)
+  (my/ivy-switch-buffer-inital-input "magit\\|gerrit "))
 
 (map! :nmvg "C-b" #'+ivy/switch-buffer
       (:map ivy-switch-buffer-map "C-b" #'ignore)
       (:after magit :map magit-mode-map
-       :nv "C-b" #'my/ivy-switch-buffer-magit)
+       :nv "C-b" #'my/ivy-switch-buffer-git)
       (:map (counsel-find-file-map ivy-minibuffer-map) "C-b"
        (lambda ()
          (interactive)
