@@ -116,7 +116,7 @@
   (when (member (buffer-name) '("index.js" "package.json" "docker-compose.yaml" "style.less"))
     (when (string-match "[^/]+/[^/]+$" (buffer-file-name))
       (rename-buffer (match-string 0 (buffer-file-name)) t))))
-(add-hook 'change-major-mode-hook #'rename-buffers-with-annoying-names)
+(add-hook 'find-file-hook #'rename-buffers-with-annoying-names)
 
 ;; lsp customization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
