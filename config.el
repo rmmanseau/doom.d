@@ -97,7 +97,6 @@
 ;; https://github.com/redguardtoo/vc-msg
 ;; https://www.reddit.com/r/emacs/comments/e93p51/better_git_blame_messages/
 
-
 (defun setup-web-indent (n)
   ;; web development
   (setq javascript-indent-level n) ; javascript-mode
@@ -110,6 +109,14 @@
   )
 (setup-web-indent 2)
 (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
+
+;; prepend annoying buffer names with their parent dir, ie:
+;; index.js -> parent-dir/index.js
+(defun rename-buffers-with-annoying-names ()
+  (when (member (buffer-name) '("index.js" "package.json" "docker-compose.yaml" "style.less"))
+    (when (string-match "[^/]+/[^/]+$" (buffer-file-name))
+      (rename-buffer (match-string 0 (buffer-file-name)) t))))
+(add-hook 'change-major-mode-hook #'rename-buffers-with-annoying-names)
 
 ;; lsp customization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
