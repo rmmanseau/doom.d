@@ -21,29 +21,28 @@
                     `((nil . ,(concat query " limit:50"))))
               (gerrit-dashboard-mode)))))
 
-    ;; override function in gerrit-rest.el
+    ;; override with updated function at https://github.com/thisch/gerrit.el/issues/8
     (defun gerrit-rest--get-gerrit-accounts ()
       "Return an alist of all active gerrit users."
       (interactive)
       (condition-case nil
-          (let ((accounts (list))
-                (batch (list))
-                (n 0)
-                (stop nil))
-            (while (not stop)
-              (progn
-                (setq batch
-                      (mapcar (lambda (account-info) (cons (cdr (assoc '_account_id account-info))
-                                                           (cdr (assoc 'username account-info))))
-                              ;; see https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html
-                              ;; and https://gerrit-review.googlesource.com/Documentation/user-search-accounts.html#_search_operators
-                              (gerrit-rest-sync "GET" nil (concat "/accounts/?q=is:active&o=DETAILS&S="
-                                                                  (number-to-string n)))))
-                (if (not (eq (length batch) 500))
-                    (setq stop t))
-                (setq n (+ n (length batch)))
-                (setq accounts (append accounts batch))
-                ))
+          (let ((continue t)
+                (start-idx 0)
+                (accounts '()))
+            (while continue
+              (let ((response
+                     ;; see https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html
+                     ;; and https://gerrit-review.googlesource.com/Documentation/user-search-accounts.html#_search_operators
+                     (gerrit-rest-sync "GET" nil (format "/accounts/?q=is:active&o=DETAILS&S=%s" start-idx))))
+                (setq accounts (append
+                                accounts
+                                (mapcar (lambda (account-info)
+                                          (cons (alist-get '_account_id account-info)
+                                                (alist-get 'username account-info)))
+                                        response)))
+                (setq start-idx (+ start-idx (length response)))
+                ;; (message "start: %s" start-idx)
+                (setq continue (alist-get '_more_accounts (car (last response))))))
             accounts)
         (error '())))
     ))
