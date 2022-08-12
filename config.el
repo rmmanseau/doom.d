@@ -113,7 +113,11 @@
 ;; prepend annoying buffer names with their parent dir, ie:
 ;; index.js -> parent-dir/index.js
 (defun rename-buffers-with-annoying-names ()
-  (when (member (buffer-name) '("index.js" "package.json" "docker-compose.yaml" "style.less"))
+  (when (member (buffer-name) '("index.js"
+                                "package.json"
+                                "docker-compose.yaml"
+                                "Dockerfile"
+                                "style.less"))
     (when (string-match "[^/]+/[^/]+$" (buffer-file-name))
       (rename-buffer (match-string 0 (buffer-file-name)) t))))
 (add-hook 'find-file-hook #'rename-buffers-with-annoying-names)
