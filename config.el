@@ -349,7 +349,8 @@
 
 ; editing
 (map! :nmv "gj" #'evil-join
-      (:map org-mode-map :n "gj" nil))
+      (:map org-mode-map :n "gj" nil)
+      (:map git-commit-mode-map :nv "gj" nil))
 (map! :nmv "g;" #'comment-line)
 (map! :n "U" #'evil-redo)
 
