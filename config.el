@@ -93,6 +93,27 @@
   :mode (("Caddyfile\\'" . caddyfile-mode)
          ("caddy\\.conf\\'" . caddyfile-mode)))
 
+(after! compile
+
+  ;; add support for eslint compilation
+  (defun compile-eslint--find-filename ()
+    "Find the filename for current error."
+    (save-match-data
+      (save-excursion
+        (when (re-search-backward (rx bol (group "/" (+ any)) eol))
+          (list (match-string 1))))))
+  (let ((form `(eslint
+                ,(rx-to-string
+                  '(and (group (group (+ digit)) ":" (group (+ digit)))
+                        (+ " ") (or "error" "warning")))
+                compile-eslint--find-filename
+                2 3 2 1)))
+    (if (assq 'eslint compilation-error-regexp-alist-alist)
+        (setf (cdr (assq 'eslint compilation-error-regexp-alist-alist)) (cdr form))
+      (push form compilation-error-regexp-alist-alist)))
+  (push 'eslint compilation-error-regexp-alist)
+  )
+
 ;; TODO: magit blame window???
 ;; https://github.com/redguardtoo/vc-msg
 ;; https://www.reddit.com/r/emacs/comments/e93p51/better_git_blame_messages/
