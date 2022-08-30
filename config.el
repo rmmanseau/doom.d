@@ -298,6 +298,13 @@
        "C-k" #'transient-scroll-up)
       (:after sql :map sql-interactive-mode-map
        "C-j" nil))
+
+;; this is so fucking stupid. evil-collection is annoying as hell
+(after! (:and evil-collection git-timemachine)
+  (evil-define-minor-mode-key 'normal 'git-timemachine-mode
+    "\C-k" nil
+    "\C-j" nil))
+
 (map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2)))
       (:after rjsx-mode :map rjsx-mode-map :nm "C-d" nil)
       (:after magit :map magit-mode-map :nm "C-d" nil)
