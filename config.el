@@ -117,6 +117,7 @@
 ;; TODO: magit blame window???
 ;; https://github.com/redguardtoo/vc-msg
 ;; https://www.reddit.com/r/emacs/comments/e93p51/better_git_blame_messages/
+;; https://github.com/seagle0128/.emacs.d/blob/master/lisp/init-vcs.el#L138
 
 (defun setup-web-indent (n)
   ;; web development
