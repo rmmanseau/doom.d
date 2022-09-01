@@ -24,4 +24,5 @@
  '(magit-diff-base ((t (:extend t :background "color-58" :foreground "#ca7818"))))
  '(magit-diff-base-highlight ((t (:extend t :background "color-58" :foreground "#fd971f" :weight bold))))
  '(show-paren-match ((t (:background "brightblack" :foreground nil))))
+ '(smerge-lower ((t (:extend t :background "color-22"))))
  '(swiper-line-face ((t (:background "color-235" :foreground nil)))))
