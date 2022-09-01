@@ -318,12 +318,14 @@
       (:map (compilation-mode-map compilation-minor-mode-map)
        :n "C-j" nil
        :n "C-k" nil )
+      (:map magit-blame-read-only-mode-map
+       :n "C-j" nil
+       :n "C-k" nil )
       (:map transient-map
        "C-j" #'transient-scroll-down
        "C-k" #'transient-scroll-up)
       (:after sql :map sql-interactive-mode-map
        "C-j" nil))
-
 ;; this is so fucking stupid. evil-collection is annoying as hell
 (after! (:and evil-collection git-timemachine)
   (evil-define-minor-mode-key 'normal 'git-timemachine-mode
@@ -348,6 +350,7 @@
 (map! :n "gb" #'better-jumper-jump-backward)
 (map! :n "gf" #'better-jumper-jump-forward)
 (map! :nmv "gc" #'goto-last-change)
+
 (map! :nmg "C-n" nil
       :nmg "C-p" nil
       (:after org :map org-mode-map
@@ -362,7 +365,12 @@
       (:map (compilation-mode-map compilation-minor-mode-map)
        :n "C-n" #'compilation-next-error
        :n "C-p" #'compilation-previous-error )
-     )
+      (:map smerge-mode-map
+       :nm "C-n" #'smerge-next
+       :nm "C-p" #'smerge-prev)
+      (:map magit-blame-read-only-mode-map
+       :nm "C-n" #'magit-blame-next-chunk
+       :nm "C-p" #'magit-blame-previous-chunk))
 
 ; text objects
 (defmacro define-and-bind-text-object (key start-regex end-regex)
@@ -411,8 +419,6 @@
        :desc "Toggle smerge mode" "m" #'smerge-mode))
 (map! :map smerge-mode-map
       :nm "RET" #'smerge-keep-current
-      :nm "C-n" #'smerge-next
-      :nm "C-p" #'smerge-prev
       :nm "M-l" #'smerge-keep-lower
       :nm "M-u" #'smerge-keep-upper
       :nm "M-b" #'smerge-keep-all)
