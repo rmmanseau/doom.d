@@ -143,7 +143,6 @@
                                 "constants.js"
                                 "constants.less"
                                 ))
->>>>>>> 5d6ce3d (add constants.* to buffers-with-annoying-names)
     (when (string-match "[^/]+/[^/]+$" (buffer-file-name))
       (rename-buffer (match-string 0 (buffer-file-name)) t))))
 (add-hook 'find-file-hook #'rename-buffers-with-annoying-names)
