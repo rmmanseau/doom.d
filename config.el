@@ -404,3 +404,15 @@
       (:map ivy-minibuffer-map
        "C-p" #'evil-paste-after
        "C-w" #'+ivy/woccur))
+
+; smerge-mode
+(map! :leader
+      (:prefix "g"
+       :desc "Toggle smerge mode" "m" #'smerge-mode))
+(map! :map smerge-mode-map
+      :nm "RET" #'smerge-keep-current
+      :nm "C-n" #'smerge-next
+      :nm "C-p" #'smerge-prev
+      :nm "M-l" #'smerge-keep-lower
+      :nm "M-u" #'smerge-keep-upper
+      :nm "M-b" #'smerge-keep-all)
