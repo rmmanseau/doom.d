@@ -210,7 +210,7 @@
        "j" #'+workspace/switch-left
        "k" #'+workspace/switch-right)
       (:prefix "b"
-       :desc "Open scratch buffer" "x" #'doom/switch-to-scratch-buffer
+       :desc "Open doom scratch buffer" "x" #'doom/switch-to-scratch-buffer
        "X" nil)
       (:prefix "p"
        :desc "Open scratch buffer" "x" #'doom/switch-to-project-scratch-buffer
