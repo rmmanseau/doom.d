@@ -214,7 +214,9 @@
        "X" nil)
       (:prefix "p"
        :desc "Open scratch buffer" "x" #'doom/switch-to-project-scratch-buffer
-       "X" nil))
+       "X" nil)
+      (:prefix ("j" . "custom")
+       :desc "fill paragraph" "f" #'fill-paragraph))
 
 ;buffer / window management
 (map! :map ivy-minibuffer-map "C-M-k" #'ivy-switch-buffer-kill)
