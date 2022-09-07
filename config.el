@@ -397,6 +397,7 @@
 (map! :nmv "gj" #'evil-join
       (:map org-mode-map :n "gj" nil)
       (:map git-commit-mode-map :nv "gj" nil))
+(map! :nmv "gJ" #'default-indent-new-line)
 (map! :nmv "g;" #'comment-line)
 (map! :n "U" #'evil-redo)
 
