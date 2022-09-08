@@ -142,6 +142,7 @@
                                 "style.less"
                                 "constants.js"
                                 "constants.less"
+                                "utils.js"
                                 ))
     (when (string-match "[^/]+/[^/]+$" (buffer-file-name))
       (rename-buffer (match-string 0 (buffer-file-name)) t))))
