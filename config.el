@@ -303,12 +303,13 @@
       "h" nil)
 (map! :nmv "j" #'evil-next-visual-line)
 (map! :nmv "k" #'evil-previous-visual-line)
+
 (map! :nmvi "C-k" (lambda () (interactive) (evil-scroll-line-down 8))
       :nmvi "C-j" (lambda () (interactive) (evil-scroll-line-up 8))
       (:after (evil-org org) :map (org-mode-map evil-org-mode-map)
        :nmiv "C-k" nil
        :nmiv "C-j" nil)
-      (:after magit :map magit-mode-map
+      (:after magit :map (magit-mode-map magit-blame-read-only-mode-map)
        :nm "C-k" nil
        :nm "C-j" nil)
       (:map grep-mode-map
@@ -318,9 +319,6 @@
        :n "C-j" nil
        :n "C-k" nil)
       (:map (compilation-mode-map compilation-minor-mode-map)
-       :n "C-j" nil
-       :n "C-k" nil )
-      (:map magit-blame-read-only-mode-map
        :n "C-j" nil
        :n "C-k" nil )
       (:map transient-map
@@ -333,6 +331,28 @@
   (evil-define-minor-mode-key 'normal 'git-timemachine-mode
     "\C-k" nil
     "\C-j" nil))
+
+(map! :nmg "C-n" nil
+      :nmg "C-p" nil
+      (:after org :map org-mode-map
+       "C-n" #'org-next-visible-heading
+       "C-p" #'org-previous-visible-heading)
+      (:after magit
+       (:map magit-mode-map
+       "C-n" #'magit-section-forward
+       "C-p" #'magit-section-backward)
+       (:map magit-blame-read-only-mode-map
+       "C-n" #'magit-blame-next-chunk
+       "C-p" #'magit-blame-previous-chunk))
+      (:map grep-mode-map
+       :n "C-n" #'next-error-no-select
+       :n "C-p" #'previous-error-no-select )
+      (:map (compilation-mode-map compilation-minor-mode-map)
+       :n "C-n" #'compilation-next-error
+       :n "C-p" #'compilation-previous-error )
+      (:map smerge-mode-map
+       :nm "C-n" #'smerge-next
+       :nm "C-p" #'smerge-prev))
 
 (map! :nm "C-d" (lambda () (interactive) (evil-scroll-line-up (/ (window-height) 2)))
       (:after rjsx-mode :map rjsx-mode-map :nm "C-d" nil)
@@ -352,27 +372,6 @@
 (map! :n "gb" #'better-jumper-jump-backward)
 (map! :n "gf" #'better-jumper-jump-forward)
 (map! :nmv "gc" #'goto-last-change)
-
-(map! :nmg "C-n" nil
-      :nmg "C-p" nil
-      (:after org :map org-mode-map
-       "C-n" #'org-next-visible-heading
-       "C-p" #'org-previous-visible-heading)
-      (:after magit :map magit-mode-map
-       "C-n" #'magit-section-forward
-       "C-p" #'magit-section-backward)
-      (:map grep-mode-map
-       :n "C-n" #'next-error-no-select
-       :n "C-p" #'previous-error-no-select )
-      (:map (compilation-mode-map compilation-minor-mode-map)
-       :n "C-n" #'compilation-next-error
-       :n "C-p" #'compilation-previous-error )
-      (:map smerge-mode-map
-       :nm "C-n" #'smerge-next
-       :nm "C-p" #'smerge-prev)
-      (:map magit-blame-read-only-mode-map
-       :nm "C-n" #'magit-blame-next-chunk
-       :nm "C-p" #'magit-blame-previous-chunk))
 
 ; text objects
 (defmacro define-and-bind-text-object (key start-regex end-regex)
