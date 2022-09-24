@@ -5,7 +5,10 @@
   (gerrit-host "gerrit.corp.arista.io") ;; needed for REST API calls
   :config
   (progn
-    ;; override function in gerrit.el
+
+    ;;
+    ;; fix error in gerrit-query, see https://github.com/thisch/gerrit.el/issues/40
+    ;;
     (defun gerrit-query (query)
       "Perform a query QUERY and display it in a dashboard buffer."
       ;; TODO offer completion in interactive ...
@@ -21,7 +24,9 @@
                     `((nil . ,(concat query " limit:50"))))
               (gerrit-dashboard-mode)))))
 
+    ;;
     ;; override with updated function at https://github.com/thisch/gerrit.el/issues/8
+    ;;
     (defun gerrit-rest--get-gerrit-accounts ()
       "Return an alist of all active gerrit users."
       (interactive)
@@ -45,6 +50,84 @@
                 (setq continue (alist-get '_more_accounts (car (last response))))))
             accounts)
         (error '())))
+
+    ;;
+    ;; override upload functions so that it ignores unknown transients instead of failing
+    ;; what a bad choice, fucc ur shitty package ! TODO: complain in yet another issue
+    ;;
+    (defun gerrit-upload:--action (&optional args)
+      "Push the current changes/commits to the gerrit server and set metadata."
+      (interactive
+       (list (transient-args 'gerrit-upload-transient)))
+
+      (gerrit--ensure-commit-msg-hook-exists)
+      ;; TODO check that all to-be-uploaded commits have a changeid line
+
+      (let (assignee
+            push-opts
+            (remote (gerrit-get-remote))
+            (refspec (gerrit-upload--get-refspec)))
+        ;; there are a bunch of push options that are supported by gerrit:
+        ;; https://gerrit-review.googlesource.com/Documentation/user-upload.html#push_options
+
+        ;; I don't like this handling of transient-args, maybe transient can
+        ;; pass alists to gerrit-upload--action instead of a list of strings
+
+        ;; TODO use code from https://github.com/raxod502/apheleia/pull/56/files
+        (cl-loop for arg in args do
+                 (cond ((s-starts-with? "reviewers=" arg)
+                        (cl-loop for reviewer in (s-split "," (s-chop-prefix "reviewers=" arg)) do
+                                 ;; TODO check that reviewers are valid (by checking that all
+                                 ;; reviewers don't contain a white-space)
+                                 (push (concat "r=" reviewer) push-opts)))
+                       ((s-starts-with? "assignee=" arg)
+                        (setq assignee (s-chop-prefix "assignee=" arg)))
+                       ((s-starts-with? "topic=" arg)
+                        (push  arg push-opts))
+                       ((string= "ready" arg)
+                        (push "ready" push-opts))
+                       ((string= "wip" arg)
+                        (push "wip" push-opts))))
+
+        (when push-opts
+          (setq refspec (concat refspec "%" (s-join "," push-opts))))
+
+        (gerrit-push-and-assign
+         assignee
+         "--no-follow-tags" ;; don't error when encountering local tags, which
+                            ;; are absent from gerrit.
+         remote
+         (concat "HEAD:"  refspec))))
+
+    ;;
+    ;; add advice that enables skipping the pre push hook by setting an env var before
+    ;; calling the upload function and then unsetting it after
+    ;;
+    (defadvice gerrit-upload:--action (around advice-gerrit-upload:--action activate)
+      (interactive)
+      (if (called-interactively-p 'any)
+	  (progn
+            (cl-loop for arg in (transient-args 'gerrit-upload-transient) do
+                     (cond ((string= "skip-checks" arg)
+                            (setenv "GIT_SKIP_PRE_PUSH_HOOK" "1"))))
+            (call-interactively (ad-get-orig-definition 'gerrit-upload:--action))
+            (setenv "GIT_SKIP_PRE_PUSH_HOOK" nil))
+        ad-do-it))
+
+    (transient-insert-suffix 'gerrit-upload-transient (list 0 -1)
+      '("s" "Skip checks" "skip-checks"))
+
+    ;; abanonded this in favor of a skip argument which ended up being
+    ;; way more involved lmao.
+    ;;
+    ;; (transient-insert-suffix 'gerrit-upload-transient (list 1 -1)
+    ;;   '("s" "Skip checks" my/gerrit-upload:--skip-pre-push))
+    ;;
+    ;; (defun my/gerrit-upload:--skip-pre-push ()
+    ;;   (interactive)
+    ;;   (setenv "GIT_SKIP_PRE_PUSH_HOOK" "1")
+    ;;   (gerrit-upload:--action)
+    ;;   (setenv "GIT_SKIP_PRE_PUSH_HOOK" nil))
     ))
 
 ;; gerrit mode function defs
